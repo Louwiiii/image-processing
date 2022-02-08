@@ -141,7 +141,7 @@ namespace ImageProcessing
         public void FromImageToFile(string file)
         {
             List<byte> fichier = new List<byte>();
-            Console.WriteLine("\nFile header");
+            // File header
 
             //this.fileType
 
@@ -158,7 +158,7 @@ namespace ImageProcessing
             fichier.AddRange(ConvertIntToEndian(this.fileDataOffset, 4));
 
 
-            Console.WriteLine("\n\nImage header");
+            // Image header
 
             //this.dibHeaderSize 
             fichier.AddRange(ConvertIntToEndian(this.dibHeaderSize, 4));
@@ -187,7 +187,7 @@ namespace ImageProcessing
             //this.numberOfImportantColors 
             fichier.AddRange(ConvertIntToEndian(this.numberOfImportantColors, 4));
 
-            Console.WriteLine("\n\nImage data");
+            // Image data
 
             for (int i = bitmapHeight-1; i >= 0; i--)
             {
@@ -293,7 +293,28 @@ namespace ImageProcessing
             
             return result; 
         }
-        
+
+        public MyImage Resized(float factor)
+        {
+            MyImage result = this.Clone();
+
+            result.bitmapWidth = (int)(this.bitmapWidth * factor);
+            result.bitmapHeight = (int)(this.bitmapHeight * factor);
+
+            for (int i = 0; i < result.bitmapHeight; i++)
+            {
+                for (int j = 0; j < result.bitmapWidth; j++)
+                {
+                    result.image[i, j] = this.image[(int)(i / result.bitmapHeight * this.bitmapHeight), (int)(j / result.bitmapWidth * this.bitmapWidth)];
+                }
+            }
+
+            result.imageSize = (int)(result.bitmapWidth * result.bitmapHeight * result.numberOfBitsPerPixel / 8);
+            result.fileSize = result.fileDataOffset + result.imageSize;
+
+            return result;
+        }
+
 
     }
 }
