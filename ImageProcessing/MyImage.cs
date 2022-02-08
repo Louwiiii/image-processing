@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace ImageProcessing
 {
@@ -103,6 +104,40 @@ namespace ImageProcessing
 
         }
 
+        /// <summary>
+        /// Creates an image from an existing image
+        /// </summary>
+        /// <param name="image"></param>
+        public MyImage(MyImage img)
+        {
+            this.fileType = img.fileType;
+            this.fileSize = img.fileSize;
+            this.fileDataOffset = img.fileDataOffset;
+
+            this.dibHeaderSize = img.dibHeaderSize;
+            this.bitmapWidth = img.bitmapWidth;
+            this.bitmapHeight = img.bitmapHeight;
+            this.numberOfColorPlanes = img.numberOfColorPlanes;
+            this.numberOfBitsPerPixel = img.numberOfBitsPerPixel;
+            this.compressionMethod = img.compressionMethod;
+            this.imageSize = img.imageSize;
+            this.horizontalResolution = img.horizontalResolution;
+            this.verticalResolution = img.verticalResolution;
+            this.numberOfColors = img.numberOfColors;
+            this.numberOfImportantColors = img.numberOfImportantColors;
+
+            // Image data
+            this.image = new Pixel[this.bitmapHeight, this.bitmapWidth];
+
+            for (int i = 0; i < this.image.GetLength(0); i++)
+            {
+                for (int j = 0; j < this.image.GetLength(1); j++)
+                {
+                    this.image[i, j] = img.image[i, j];
+                }
+            }
+        }
+
         public void FromImageToFile (string file)
         {
             byte[] bytes;
@@ -120,9 +155,34 @@ namespace ImageProcessing
 
         public static byte[] ConvertIntToEndian (int value, uint numberOfBytes)
         {
-            byte[] tab = BitConverter.GetBytes(value);
+            List<byte> tab = BitConverter.GetBytes(value).ToList();
+            
+            while (tab.Count < numberOfBytes)
+            {
+                tab.Add(new byte());
+            }
 
-            return tab;
+            return tab.ToArray();
+        }
+
+        public MyImage Clone ()
+        {
+            return new MyImage(this);
+        }
+
+        public MyImage ToShadesOfGrey ()
+        {
+            MyImage result = this.Clone();
+
+            for (int i = 0; i < result.image.GetLength(0); i++)
+            {
+                for (int j = 0; j < result.image.GetLength(1); j++)
+                {
+                    result.image[i, j] = result.image[i, j].ToGrey();
+                }
+            }
+
+            return result;
         }
 
     }
