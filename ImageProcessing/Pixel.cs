@@ -19,5 +19,10 @@ namespace ImageProcessing
         {
             return R + " " + G + " " + B;
         }
+
+        public Pixel ToGrey()
+        {
+            return new Pixel((R+G+B)/3, (R + G + B) / 3, (R + G + B) / 3);
+        }
     }
 }
