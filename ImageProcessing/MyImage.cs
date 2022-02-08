@@ -72,7 +72,8 @@ namespace ImageProcessing
                 this.numberOfColors = ConvertEndianToInt(bytes.Skip(46).Take(4).ToArray());
                 this.numberOfImportantColors = ConvertEndianToInt(bytes.Skip(50).Take(4).ToArray());
 
-                Console.WriteLine(this.bitmapWidth + " ");
+                Console.WriteLine(this.bitmapWidth + " " + this.bitmapHeight + " " + this.numberOfColorPlanes + " " + this.numberOfBitsPerPixel + " " + this.compressionMethod + " " + this.imageSize + " " + this.horizontalResolution
+                    + " " + this.verticalResolution + " " + this.numberOfColors + " " + this.numberOfImportantColors);
 
                 for (int i = 14; i < 14+40; i++)
                 {
@@ -89,9 +90,11 @@ namespace ImageProcessing
                     for (int j = 0; j < bitmapWidth; j++)
                     {
                         byte[] pixelData = imageData.Skip(3 * (bitmapWidth * i + j)).Take(3).ToArray();
-                        this.image[i, j] = new Pixel(pixelData[2], pixelData[1], pixelData[0]);
+                        this.image[bitmapHeight-i-1, j] = new Pixel(pixelData[2], pixelData[1], pixelData[0]);
                     }
                 }
+
+                // Pixel at [0, 0] is the top left pixel
             }
             catch (Exception e)
             {

@@ -14,5 +14,10 @@ namespace ImageProcessing
             this.G = g;
             this.B = b;
         }
+
+        public override string ToString()
+        {
+            return R + " " + G + " " + B;
+        }
     }
 }
