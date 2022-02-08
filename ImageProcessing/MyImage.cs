@@ -106,44 +106,50 @@ namespace ImageProcessing
 
         public void FromImageToFile (string file)
         {
-                List<byte> fichier = new List<byte>;
+                List<byte> fichier = new List<byte>();
                 Console.WriteLine("\nFile header");
-
-                fichier.Add();
-                this.fileType = ((char)bytes[0]).ToString() + ((char)bytes[1]).ToString();
-
                 
-                this.fileSize = ConvertEndianToInt(bytes.Skip(2).Take(4).ToArray());
-            fichier.Add(ConvertIntToIndian())
-                this.fileDataOffset = ConvertEndianToInt(bytes.Skip(10).Take(4).ToArray());
+                //this.fileType
+                //comment convertir BM en 6677 ? 
+                fichier.Add(ConvertIntToEndian(this.fileType, 4));
+                
+                //this.fileSize
+                fichier.AddRange(ConvertIntToEndian(this.fileSize, 4));
 
-                Console.WriteLine(fileType + " " + fileSize + " " + fileDataOffset);
+                //this.fileDataOffset
+                fichier.AddRange(ConvertIntToEndian(this.fileDataOffset, 4));
 
-                for (int i = 0; i < 14; i++)
-                {
-                    Console.Write(bytes[i] + " ");
-                }
 
                 Console.WriteLine("\n\nImage header");
 
-                this.dibHeaderSize = ConvertEndianToInt(bytes.Skip(14).Take(4).ToArray());
+                //this.dibHeaderSize 
+            fichier.AddRange(ConvertIntToEndian(this.dibHeaderSize, 4));
 
-                this.bitmapWidth = ConvertEndianToInt(bytes.Skip(18).Take(4).ToArray());
-                this.bitmapHeight = ConvertEndianToInt(bytes.Skip(22).Take(4).ToArray());
+            //this.bitmapWidth 
+            fichier.AddRange(ConvertIntToEndian(this.bitmapWidth, 4));
+            //this.bitmapHeight
+            fichier.AddRange(ConvertIntToEndian(this.bitmapHeight, 4));
 
-                this.numberOfColorPlanes = ConvertEndianToInt(bytes.Skip(26).Take(2).ToArray());
-                this.numberOfBitsPerPixel = ConvertEndianToInt(bytes.Skip(28).Take(2).ToArray());
-                this.compressionMethod = ConvertEndianToInt(bytes.Skip(30).Take(4).ToArray());
-                this.imageSize = ConvertEndianToInt(bytes.Skip(34).Take(4).ToArray());
+            //this.numberOfColorPlanes 
+            fichier.AddRange(ConvertIntToEndian(this.numberOfColorPlanes, 2));
+            //this.numberOfBitsPerPixel 
+            fichier.AddRange(ConvertIntToEndian(this.numberOfBitsPerPixel, 2));
+            //this.compressionMethod
+            fichier.AddRange(ConvertIntToEndian(this.compressionMethod, 4));
+            //this.imageSize 
+            fichier.AddRange(ConvertIntToEndian(this.imageSize, 4));
 
-                this.horizontalResolution = ConvertEndianToInt(bytes.Skip(38).Take(4).ToArray());
-                this.verticalResolution = ConvertEndianToInt(bytes.Skip(42).Take(4).ToArray());
+            //this.horizontalResolution
+            fichier.AddRange(ConvertIntToEndian(this.horizontalResolution, 4));
+            //this.verticalResolution 
+            fichier.AddRange(ConvertIntToEndian(this.verticalResolution, 4));
 
-                this.numberOfColors = ConvertEndianToInt(bytes.Skip(46).Take(4).ToArray());
-                this.numberOfImportantColors = ConvertEndianToInt(bytes.Skip(50).Take(4).ToArray());
+            //this.numberOfColors
+            fichier.AddRange(ConvertIntToEndian(this.numberOfColors, 4));
+            //this.numberOfImportantColors 
+            fichier.AddRange(ConvertIntToEndian(this.numberOfImportantColors, 4));
 
-                Console.WriteLine(this.bitmapWidth + " " + this.bitmapHeight + " " + this.numberOfColorPlanes + " " + this.numberOfBitsPerPixel + " " + this.compressionMethod + " " + this.imageSize + " " + this.horizontalResolution
-                    + " " + this.verticalResolution + " " + this.numberOfColors + " " + this.numberOfImportantColors);
+            Console.WriteLine("\n\nImage data");
 
         }
 
