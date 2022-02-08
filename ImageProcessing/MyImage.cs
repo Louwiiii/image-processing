@@ -248,5 +248,41 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="direction">0: De droite à gauche. 1: De haut en bas.</param>
+        /// <returns></returns>
+        public MyImage EffetMiroir(int direction)
+        {
+            MyImage result = this.Clone();
+
+            switch (direction)
+            {
+                case 0:
+                    for (int i = 0; i < result.image.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < result.image.GetLength(1); j++)
+                        {
+                            result.image[i, j] = image[i, result.image.GetLength(1) - j - 1];
+                        }
+                    }
+                    break;
+                case 1:
+                    for (int i = 0; i < result.image.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < result.image.GetLength(1); j++)
+                        {
+                            result.image[i, j] = image[result.image.GetLength(0) - i - 1, j];
+                        }
+                    }
+                    break;
+                default:
+                    throw new Exception("cette direction n'existe pas");
+            }
+            
+            return result; 
+        }
+
     }
 }
