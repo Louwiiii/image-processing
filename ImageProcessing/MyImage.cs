@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace ImageProcessing
 {
@@ -105,7 +106,45 @@ namespace ImageProcessing
 
         public void FromImageToFile (string file)
         {
-            byte[] bytes;
+                List<byte> fichier = new List<byte>;
+                Console.WriteLine("\nFile header");
+
+                fichier.Add();
+                this.fileType = ((char)bytes[0]).ToString() + ((char)bytes[1]).ToString();
+
+                
+                this.fileSize = ConvertEndianToInt(bytes.Skip(2).Take(4).ToArray());
+            fichier.Add(ConvertIntToIndian())
+                this.fileDataOffset = ConvertEndianToInt(bytes.Skip(10).Take(4).ToArray());
+
+                Console.WriteLine(fileType + " " + fileSize + " " + fileDataOffset);
+
+                for (int i = 0; i < 14; i++)
+                {
+                    Console.Write(bytes[i] + " ");
+                }
+
+                Console.WriteLine("\n\nImage header");
+
+                this.dibHeaderSize = ConvertEndianToInt(bytes.Skip(14).Take(4).ToArray());
+
+                this.bitmapWidth = ConvertEndianToInt(bytes.Skip(18).Take(4).ToArray());
+                this.bitmapHeight = ConvertEndianToInt(bytes.Skip(22).Take(4).ToArray());
+
+                this.numberOfColorPlanes = ConvertEndianToInt(bytes.Skip(26).Take(2).ToArray());
+                this.numberOfBitsPerPixel = ConvertEndianToInt(bytes.Skip(28).Take(2).ToArray());
+                this.compressionMethod = ConvertEndianToInt(bytes.Skip(30).Take(4).ToArray());
+                this.imageSize = ConvertEndianToInt(bytes.Skip(34).Take(4).ToArray());
+
+                this.horizontalResolution = ConvertEndianToInt(bytes.Skip(38).Take(4).ToArray());
+                this.verticalResolution = ConvertEndianToInt(bytes.Skip(42).Take(4).ToArray());
+
+                this.numberOfColors = ConvertEndianToInt(bytes.Skip(46).Take(4).ToArray());
+                this.numberOfImportantColors = ConvertEndianToInt(bytes.Skip(50).Take(4).ToArray());
+
+                Console.WriteLine(this.bitmapWidth + " " + this.bitmapHeight + " " + this.numberOfColorPlanes + " " + this.numberOfBitsPerPixel + " " + this.compressionMethod + " " + this.imageSize + " " + this.horizontalResolution
+                    + " " + this.verticalResolution + " " + this.numberOfColors + " " + this.numberOfImportantColors);
+
         }
 
         public static int ConvertEndianToInt(byte[] tab)
