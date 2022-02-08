@@ -76,7 +76,7 @@ namespace ImageProcessing
                 Console.WriteLine(this.bitmapWidth + " " + this.bitmapHeight + " " + this.numberOfColorPlanes + " " + this.numberOfBitsPerPixel + " " + this.compressionMethod + " " + this.imageSize + " " + this.horizontalResolution
                     + " " + this.verticalResolution + " " + this.numberOfColors + " " + this.numberOfImportantColors);
 
-                for (int i = 14; i < 14+40; i++)
+                for (int i = 14; i < 14 + 40; i++)
                 {
                     Console.Write(bytes[i] + " ");
                 }
@@ -91,7 +91,7 @@ namespace ImageProcessing
                     for (int j = 0; j < bitmapWidth; j++)
                     {
                         byte[] pixelData = imageData.Skip(3 * (bitmapWidth * i + j)).Take(3).ToArray();
-                        this.image[bitmapHeight-i-1, j] = new Pixel(pixelData[2], pixelData[1], pixelData[0]);
+                        this.image[bitmapHeight - i - 1, j] = new Pixel(pixelData[2], pixelData[1], pixelData[0]);
                     }
                 }
 
@@ -138,25 +138,29 @@ namespace ImageProcessing
             }
         }
 
-        public void FromImageToFile (string file)
+        public void FromImageToFile(string file)
         {
-                List<byte> fichier = new List<byte>();
-                Console.WriteLine("\nFile header");
-                
-                //this.fileType
-                //comment convertir BM en 6677 ? 
-                fichier.Add(ConvertIntToEndian(this.fileType, 4));
-                
-                //this.fileSize
-                fichier.AddRange(ConvertIntToEndian(this.fileSize, 4));
+            List<byte> fichier = new List<byte>();
+            Console.WriteLine("\nFile header");
 
-                //this.fileDataOffset
-                fichier.AddRange(ConvertIntToEndian(this.fileDataOffset, 4));
+            //this.fileType
+
+            fichier.Add((byte)this.fileType[0]);
+            fichier.Add((byte)this.fileType[1]);
+
+            //this.fileSize
+            fichier.AddRange(ConvertIntToEndian(this.fileSize, 4));
+
+            //ajout de 4 bytes de réserve
+            fichier.AddRange(new byte[] { new byte(), new byte(), new byte(), new byte()});
+
+            //this.fileDataOffset
+            fichier.AddRange(ConvertIntToEndian(this.fileDataOffset, 4));
 
 
-                Console.WriteLine("\n\nImage header");
+            Console.WriteLine("\n\nImage header");
 
-                //this.dibHeaderSize 
+            //this.dibHeaderSize 
             fichier.AddRange(ConvertIntToEndian(this.dibHeaderSize, 4));
 
             //this.bitmapWidth 
@@ -185,6 +189,16 @@ namespace ImageProcessing
 
             Console.WriteLine("\n\nImage data");
 
+            for (int i = bitmapHeight-1; i >= 0; i--)
+            {
+                for (int j = 0; j < bitmapWidth; j++)
+                {
+                    byte[] pixelData = { (byte)image[i, j].B, (byte)image[i, j].G, (byte)image[i, j].R };
+                    fichier.AddRange(pixelData);
+                }
+            }
+
+            File.WriteAllBytes(file, fichier.ToArray());
         }
 
         public static int ConvertEndianToInt(byte[] tab)
@@ -197,24 +211,29 @@ namespace ImageProcessing
             return result;
         }
 
-        public static byte[] ConvertIntToEndian (int value, uint numberOfBytes)
+        public static byte[] ConvertIntToEndian(int value, uint numberOfBytes)
         {
             List<byte> tab = BitConverter.GetBytes(value).ToList();
-            
+
             while (tab.Count < numberOfBytes)
             {
                 tab.Add(new byte());
             }
 
+            while (tab.Count > numberOfBytes)
+            {
+                tab.RemoveAt(tab.Count - 1);
+            }
+
             return tab.ToArray();
         }
 
-        public MyImage Clone ()
+        public MyImage Clone()
         {
             return new MyImage(this);
         }
 
-        public MyImage ToShadesOfGrey ()
+        public MyImage ToShadesOfGrey()
         {
             MyImage result = this.Clone();
 
