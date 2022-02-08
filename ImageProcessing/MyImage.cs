@@ -157,15 +157,8 @@ namespace ImageProcessing
             return result;
         }
 
-        public static byte[] ConvertIntToEndian (int value)
+        public static byte[] ConvertIntToEndian (int value, uint numberOfBytes)
         {
-            // Find the biggest power of 256 lower or equal than value
-            int i = 0;
-            while (Math.Pow(256, i+1) < value)
-            {
-                i += 1;
-            }
-
             byte[] tab = BitConverter.GetBytes(value);
 
             return tab;
