@@ -248,6 +248,16 @@ namespace ImageProcessing
             return result;
         }
 
+
+        public MyImage Rotation(int degre)
+        {
+            MyImage result = this.Clone();
+
+            return result;
+
+        }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -283,6 +293,7 @@ namespace ImageProcessing
             
             return result; 
         }
+        
 
     }
 }
