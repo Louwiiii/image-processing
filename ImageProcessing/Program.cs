@@ -7,7 +7,7 @@ namespace ImageProcessing
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(MyImage.ConvertIntToEndian(256)[2]);
+            Console.WriteLine(MyImage.ConvertIntToEndian(256, 4)[0]);
 
             MyImage img = new MyImage("Images/coco.bmp");
             Console.ReadKey();
