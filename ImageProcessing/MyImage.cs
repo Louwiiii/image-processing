@@ -267,10 +267,20 @@ namespace ImageProcessing
 
         public MyImage Rotation(int degre)
         {
+            double angle = degre * (Math.PI) / 180;
             MyImage result = this.Clone();
-
+            /*result.bitmapWidth = (int) (Math.Sin(angle)*this.bitmapHeight + Math.Cos(angle)*this.bitmapWidth);
+            result.bitmapHeight = (int)(Math.Cos(angle) * this.bitmapHeight + Math.Sin(angle) * this.bitmapWidth);
+            result.fileSize = result.bitmapWidth * result.bitmapHeight * 3 + 54;
+            result.imageSize = result.fileSize - 54;
+            for (int i = 0; i < result.bitmapWidth; i++)
+            {
+                for (int j = 0; j < result.bitmapHeight; j++)
+                {
+                    result.image[(int)(Math.Sin(angle)* (this.bitmapWidth-j) + Math.Cos(angle)*i),(int) (Math.Sin(angle) *i + Math.Cos(angle) * j)] = image[i, j];
+                }
+            }*/
             return result;
-
         }
 
 
