@@ -24,5 +24,11 @@ namespace ImageProcessing
         {
             return new Pixel((R+G+B)/3, (R + G + B) / 3, (R + G + B) / 3);
         }
+
+        public Pixel ToBlackOrWhite()
+        {
+            int value = ((R + G + B) / 3) <= 127 ? 0 : 255;
+            return new Pixel(value, value, value);
+        }
     }
 }
