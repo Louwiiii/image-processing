@@ -355,6 +355,48 @@ namespace ImageProcessing
             return result;
         }
 
+        public MyImage Convoluted (float[,] kernel)
+        {
+            MyImage result = this.Clone();
+
+            int[][,] resultChannels = new int[3][,];
+
+            int[][,] channels = GetChannels();
+
+            for (int i = 0; i < 3; i++)
+            {
+                resultChannels[i] = Convolution(channels[i], kernel) ;
+            }
+
+            return null;
+        }
+
+        public int[][,] GetChannels ()
+        {
+            int[][,] result = new int[3][,];
+
+            for (int i = 0; i < 3; i++)
+            {
+                result[i] = new int[this.bitmapHeight, this.bitmapWidth];
+            }
+
+            for (int i = 0; i < this.bitmapHeight; i++)
+            {
+                for (int j = 0; j < this.bitmapWidth; j++)
+                {
+                    result[0][i, j] = this.image[i, j].R;
+                    result[1][i, j] = this.image[i, j].G;
+                    result[2][i, j] = this.image[i, j].B;
+                }
+            }
+
+            return result;
+        }
+
+        public int[,] Convolution (int[,] matrix, float[,] kernel)
+        {
+            return null;
+        }
 
     }
 }
