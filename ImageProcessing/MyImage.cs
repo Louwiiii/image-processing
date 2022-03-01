@@ -10,7 +10,7 @@ namespace ImageProcessing
 
         // File header data
         string fileType;
-        int fileSize;
+        
         int fileDataOffset;
 
 
@@ -28,6 +28,13 @@ namespace ImageProcessing
             get
             {
                 return this.image.GetLength(0);
+            }
+        }
+        int fileSize
+        {
+            get
+            {
+                return imageSize + fileDataOffset;
             }
         }
         int numberOfColorPlanes;
@@ -62,7 +69,7 @@ namespace ImageProcessing
 
                 this.fileType = ((char)bytes[0]).ToString() + ((char)bytes[1]).ToString();
 
-                this.fileSize = ConvertEndianToInt(bytes.Skip(2).Take(4).ToArray());
+                int fileSize = ConvertEndianToInt(bytes.Skip(2).Take(4).ToArray());
 
                 this.fileDataOffset = ConvertEndianToInt(bytes.Skip(10).Take(4).ToArray());
 
@@ -130,7 +137,7 @@ namespace ImageProcessing
         public MyImage(MyImage img)
         {
             this.fileType = img.fileType;
-            this.fileSize = img.fileSize;
+            int fileSize = img.fileSize;
             this.fileDataOffset = img.fileDataOffset;
 
             this.dibHeaderSize = img.dibHeaderSize;
@@ -269,17 +276,33 @@ namespace ImageProcessing
         {
             double angle = degre * (Math.PI) / 180;
             MyImage result = this.Clone();
-            /*result.bitmapWidth = (int) (Math.Sin(angle)*this.bitmapHeight + Math.Cos(angle)*this.bitmapWidth);
-            result.bitmapHeight = (int)(Math.Cos(angle) * this.bitmapHeight + Math.Sin(angle) * this.bitmapWidth);
-            result.fileSize = result.bitmapWidth * result.bitmapHeight * 3 + 54;
-            result.imageSize = result.fileSize - 54;
-            for (int i = 0; i < result.bitmapWidth; i++)
+            Console.WriteLine(this.bitmapWidth + " " + this.bitmapHeight);
+            int newBitmapWidth = (int) (Math.Sin(angle)*this.bitmapHeight + Math.Cos(angle)*this.bitmapWidth);
+            int newBitmapHeight = (int)(Math.Cos(angle) * this.bitmapHeight + Math.Sin(angle) * this.bitmapWidth);
+            Console.WriteLine(newBitmapWidth + " " + newBitmapHeight);
+            result.image = new Pixel[newBitmapHeight, newBitmapWidth];
+            for (int i = 0; i < result.bitmapHeight; i++)
             {
-                for (int j = 0; j < result.bitmapHeight; j++)
+                for (int j = 0; j < result.bitmapWidth; j++)
                 {
-                    result.image[(int)(Math.Sin(angle)* (this.bitmapWidth-j) + Math.Cos(angle)*i),(int) (Math.Sin(angle) *i + Math.Cos(angle) * j)] = image[i, j];
+                    result.image[i, j] = new Pixel(255, 0, 0);
+
                 }
-            }*/
+            }
+            int x = 0;
+            int y = 0;
+            for (int i = 0; i < this.bitmapHeight; i++)
+            {
+                for (int j = 0; j < this.bitmapWidth; j++)
+                {
+                    x = (int)(Math.Sin(angle) * i + Math.Cos(angle) * j);
+                    y = (int)(Math.Sin(angle) * (this.bitmapWidth - j) + Math.Cos(angle) * i);
+                    
+                    result.image[x, y] = image[i, j];
+                    
+                    
+                }
+            }
             return result;
         }
 
@@ -334,8 +357,6 @@ namespace ImageProcessing
                     result.image[i, j] = this.image[(int)(i * 1.0f / result.bitmapHeight * this.bitmapHeight), (int)(j * 1.0f / result.bitmapWidth * this.bitmapWidth)];
                 }
             }
-
-            result.fileSize = result.fileDataOffset + result.imageSize;
 
             return result;
         }
