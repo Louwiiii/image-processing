@@ -10,8 +10,8 @@ namespace ImageProcessing
             Console.WriteLine(MyImage.ConvertIntToEndian(256, 4)[0]);
 
             MyImage img = new MyImage("Images/coco.bmp");
-            img.EffetMiroir(0).FromImageToFile("Images/coco22.bmp");
-            MyImage img1 = new MyImage("Images/coco22.bmp");
+            img.Rotation(90).FromImageToFile("Images/coco23.bmp");
+            //MyImage img1 = new MyImage("Images/coco23.bmp");
             
             Console.ReadKey();
 
