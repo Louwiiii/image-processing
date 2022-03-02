@@ -1,7 +1,7 @@
 ﻿using System;
 namespace ImageProcessing
 {
-    public class Pixel
+    public struct Pixel
     {
 
         public int R { get; set; }

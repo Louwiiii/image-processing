@@ -10,7 +10,13 @@ namespace ImageProcessing
 
         // File header data
         string fileType;
-        int fileSize;
+        int fileSize
+        {
+            get
+            {
+                return imageSize + fileDataOffset;
+            }
+        }
         int fileDataOffset;
 
 
@@ -62,7 +68,7 @@ namespace ImageProcessing
 
                 this.fileType = ((char)bytes[0]).ToString() + ((char)bytes[1]).ToString();
 
-                this.fileSize = ConvertEndianToInt(bytes.Skip(2).Take(4).ToArray());
+                int fileSize = ConvertEndianToInt(bytes.Skip(2).Take(4).ToArray());
 
                 this.fileDataOffset = ConvertEndianToInt(bytes.Skip(10).Take(4).ToArray());
 
@@ -130,7 +136,7 @@ namespace ImageProcessing
         public MyImage(MyImage img)
         {
             this.fileType = img.fileType;
-            this.fileSize = img.fileSize;
+            int fileSize = img.fileSize;
             this.fileDataOffset = img.fileDataOffset;
 
             this.dibHeaderSize = img.dibHeaderSize;
@@ -173,7 +179,6 @@ namespace ImageProcessing
             //this.fileDataOffset
             fichier.AddRange(ConvertIntToEndian(this.fileDataOffset, 4));
 
-
             // Image header
 
             //this.dibHeaderSize 
@@ -211,6 +216,13 @@ namespace ImageProcessing
                 {
                     byte[] pixelData = { (byte)image[i, j].B, (byte)image[i, j].G, (byte)image[i, j].R };
                     fichier.AddRange(pixelData);
+                }
+
+                int k = 0;
+                while ((bitmapWidth * 3 + k) % 4 != 0)
+                {
+                    fichier.Add((byte) 0);
+                    k++;
                 }
             }
 
@@ -279,22 +291,93 @@ namespace ImageProcessing
             return result;
         }
 
-
-        public MyImage Rotation(int degre)
+        public static double Distance (double x1, double y1, double x2, double y2)
         {
-            double angle = degre * (Math.PI) / 180;
+            return Math.Sqrt(Math.Pow(x1 - x2, 2) + Math.Pow(y1 - y2, 2));
+        }
+
+        public MyImage Rotation(int degrees)
+        {
+            degrees = degrees % 360;
+            double angle = degrees * (Math.PI) / 180f;
             MyImage result = this.Clone();
-            /*result.bitmapWidth = (int) (Math.Sin(angle)*this.bitmapHeight + Math.Cos(angle)*this.bitmapWidth);
-            result.bitmapHeight = (int)(Math.Cos(angle) * this.bitmapHeight + Math.Sin(angle) * this.bitmapWidth);
-            result.fileSize = result.bitmapWidth * result.bitmapHeight * 3 + 54;
-            result.imageSize = result.fileSize - 54;
-            for (int i = 0; i < result.bitmapWidth; i++)
+            Console.WriteLine(this.bitmapWidth + " " + this.bitmapHeight);
+
+            int height_corner_x = 0;
+            int height_corner_y = 0;
+            int width_corner_x = 0;
+            int width_corner_y = 0;
+
+            // New height and width are calculated using coordinates of the corners of the image
+            if (degrees <= 90 || (degrees >= 180 && degrees <= 270))
             {
-                for (int j = 0; j < result.bitmapHeight; j++)
+                // Height corner is the top right / bottom left
+                height_corner_y = bitmapHeight / 2;
+                height_corner_x = bitmapWidth / 2;
+
+                // Width corner is the bottom right / top left
+                width_corner_y = - bitmapHeight / 2;
+                width_corner_x = bitmapWidth / 2;
+
+            } else
+            {
+                // Height corner is the bottom right / top left
+                height_corner_y = - bitmapHeight / 2;
+                height_corner_x = bitmapWidth / 2;
+
+                // Width corner is the top right / bottom left
+                width_corner_y = bitmapHeight / 2;
+                width_corner_x = bitmapWidth / 2;
+            }
+
+            // Get angle of the corners before rotation, add angle of rotation and get sinus and cosinus
+            int newBitmapHeight = (int) Math.Abs(2 * Distance(height_corner_x, height_corner_y, 0, 0) * Math.Sin(Math.Atan2(height_corner_y, height_corner_x) + angle));
+            int newBitmapWidth = (int) Math.Abs(2 * Distance(width_corner_x, width_corner_y, 0, 0) * Math.Cos(Math.Atan2(width_corner_y, width_corner_x) + angle));
+
+            Console.WriteLine(newBitmapWidth + " " + newBitmapHeight);
+            result.image = new Pixel[newBitmapHeight, newBitmapWidth];
+
+            double oldX;
+            double oldY;
+            
+            for (int newI = 0; newI < result.bitmapHeight; newI++)
+            {
+                for (int newJ = 0; newJ < result.bitmapWidth; newJ++)
                 {
-                    result.image[(int)(Math.Sin(angle)* (this.bitmapWidth-j) + Math.Cos(angle)*i),(int) (Math.Sin(angle) *i + Math.Cos(angle) * j)] = image[i, j];
+                    //x = (int)(Math.Sin(angle) * i + Math.Cos(angle) * j);
+                    //y = (int)(Math.Sin(angle) * (this.bitmapWidth - j) + Math.Cos(angle) * i);
+
+                    // Center is in (0, 0)
+
+                    double new_x = newJ - (newBitmapWidth/2);
+                    double new_y = (newBitmapHeight/2) - newI;
+
+                    oldX = (Distance(new_x, new_y, 0, 0) * Math.Cos(Math.Atan2(new_y - 0, new_x - 0) - angle)) ;
+                    oldY = (Distance(new_x, new_y, 0, 0) * Math.Sin(Math.Atan2(new_y - 0, new_x - 0) - angle));
+
+                    int oldI = (int) ((bitmapHeight / 2) - oldY);
+                    int oldJ = (int) (oldX + (bitmapWidth / 2));
+
+                    if (newI == 181 && newJ == 185)
+                    {
+                        Console.WriteLine(new_x + " " + new_y + " Distance: " + Distance(new_x, new_y, 0, 0)+ " Angle: " + Math.Atan2(new_y - 0, new_x - 0) + " " + oldX + " " + oldY + " " + oldI + " " + oldJ + " Bm width: " + bitmapWidth + " Bm height: " + bitmapHeight);
+                    }
+
+                    if (oldJ < 0 || oldI < 0 || oldJ >= bitmapWidth || oldI >= bitmapHeight)
+                    {
+                        result.image[newI, newJ] = new Pixel(255, 255, 255);
+                    }
+                    else
+                    {
+                        result.image[newI, newJ] = image[oldI, oldJ];
+                        if (newI == 181 && newJ == 185)
+                        {
+                            Console.WriteLine(newI + " " + newJ + " " + image[oldI, oldJ]);
+                        }
+                    }
                 }
-            }*/
+            }
+            
             return result;
         }
 
@@ -349,8 +432,6 @@ namespace ImageProcessing
                     result.image[i, j] = this.image[(int)(i * 1.0f / result.bitmapHeight * this.bitmapHeight), (int)(j * 1.0f / result.bitmapWidth * this.bitmapWidth)];
                 }
             }
-
-            result.fileSize = result.fileDataOffset + result.imageSize;
 
             return result;
         }
