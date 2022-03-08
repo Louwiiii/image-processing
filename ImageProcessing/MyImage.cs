@@ -10,6 +10,13 @@ namespace ImageProcessing
 
         // File header data
         string fileType;
+        int fileSize
+        {
+            get
+            {
+                return imageSize + fileDataOffset;
+            }
+        }
         
         int fileDataOffset;
 
@@ -180,7 +187,6 @@ namespace ImageProcessing
             //this.fileDataOffset
             fichier.AddRange(ConvertIntToEndian(this.fileDataOffset, 4));
 
-
             // Image header
 
             //this.dibHeaderSize 
@@ -218,6 +224,13 @@ namespace ImageProcessing
                 {
                     byte[] pixelData = { (byte)image[i, j].B, (byte)image[i, j].G, (byte)image[i, j].R };
                     fichier.AddRange(pixelData);
+                }
+
+                int k = 0;
+                while ((bitmapWidth * 3 + k) % 4 != 0)
+                {
+                    fichier.Add((byte) 0);
+                    k++;
                 }
             }
 
@@ -286,38 +299,27 @@ namespace ImageProcessing
             return result;
         }
 
-
-        public MyImage Rotation(int degre)//ne marche pas 
+        public static double Distance (double x1, double y1, double x2, double y2)
         {
-            double angle = degre * (Math.PI) / 180;
-            MyImage result = this.Clone();
-            Console.WriteLine(this.bitmapWidth + " " + this.bitmapHeight);
-            int newBitmapWidth = (int) (Math.Sin(angle)*this.bitmapHeight + Math.Cos(angle)*this.bitmapWidth);
-            int newBitmapHeight = (int)(Math.Cos(angle) * this.bitmapHeight + Math.Sin(angle) * this.bitmapWidth);
-            Console.WriteLine(newBitmapWidth + " " + newBitmapHeight);
-            result.image = new Pixel[newBitmapHeight, newBitmapWidth];
-            for (int i = 0; i < result.bitmapHeight; i++)
-            {
-                for (int j = 0; j < result.bitmapWidth; j++)
-                {
-                    result.image[i, j] = new Pixel(255, 0, 0);
+            return Math.Sqrt(Math.Pow(x1 - x2, 2) + Math.Pow(y1 - y2, 2));
+        }
 
-                }
-            }
-            int x = 0;
-            int y = 0;
-            for (int i = 0; i < this.bitmapHeight; i++)
+        public MyImage Rotation(int degre)
+        {
+            degrees = degrees % 360;
+            double angle = degrees * (Math.PI) / 180f;
+            MyImage result = this.Clone();
+            /*result.bitmapWidth = (int) (Math.Sin(angle)*this.bitmapHeight + Math.Cos(angle)*this.bitmapWidth);
+            result.bitmapHeight = (int)(Math.Cos(angle) * this.bitmapHeight + Math.Sin(angle) * this.bitmapWidth);
+            result.fileSize = result.bitmapWidth * result.bitmapHeight * 3 + 54;
+            result.imageSize = result.fileSize - 54;
+            for (int i = 0; i < result.bitmapWidth; i++)
             {
-                for (int j = 0; j < this.bitmapWidth; j++)
+                for (int j = 0; j < result.bitmapHeight; j++)
                 {
-                    x = (int)(Math.Sin(angle) * i + Math.Cos(angle) * j);
-                    y = (int)(Math.Sin(angle) * (this.bitmapWidth - j) + Math.Cos(angle) * i);
-                    
-                    result.image[x, y] = image[i, j];
-                    
-                    
+                    result.image[(int)(Math.Sin(angle)* (this.bitmapWidth-j) + Math.Cos(angle)*i),(int) (Math.Sin(angle) *i + Math.Cos(angle) * j)] = image[i, j];
                 }
-            }
+            }*/
             return result;
         }
 
