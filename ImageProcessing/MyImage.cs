@@ -287,7 +287,7 @@ namespace ImageProcessing
         }
 
 
-        public MyImage Rotation(int degre)
+        public MyImage Rotation(int degre)//ne marche pas 
         {
             double angle = degre * (Math.PI) / 180;
             MyImage result = this.Clone();
@@ -416,8 +416,60 @@ namespace ImageProcessing
 
         public int[,] Convolution (int[,] matrix, float[,] kernel)
         {
+            int[,] matrixconv = new int[matrix.GetLength(0), matrix.GetLength(1)];
+
+            for (int i=0; i < matrix.GetLength(0); i++)
+            {
+                for (int j=0; j< matrix.GetLength(1); j++)
+                {
+                    for (int k=0; k<3; k++)
+                    {
+                        for (int l=0; l<3; l++)
+                        {
+                            matrixconv[i, j] = kernel(k,l)*matrix[i-1+l,j-1+k];
+                            Console.Write(matrixconv[i, j]);
+                        }
+                    }
+                }
+                Console.WriteLine();
+            }
             return null;
         }
+        //Méthode juste pour vérifier la convolution
+        //A tej après
+        static void AfficherMatrice(int[,] matrice)
+        {
+            if (matrice == null)
+            {
+                Console.WriteLine("Matrice null");
+            }
+            else if (matrice.GetLength(0) == 0 && matrice.GetLength(1) == 0)
+            {
+                Console.WriteLine("Matrice vide");
+            }
+            else
+            {
+                for (int j = 0; j < matrice.GetLength(0); j++)
+                {
+                    for (int i = 0; i < matrice.GetLength(1); i++)
+                    {
+                        int aff = matrice[j, i];
+                        if (aff >= 10)
+                        {
+                            Console.Write(aff);
+                        }
+                        else
+                        {
+                            Console.Write(" " + aff);
+                        }
+                        Console.Write(" ");
+                    }
+                    Console.WriteLine();
+                }
+            }
+
+        }
+
 
     }
 }
