@@ -37,13 +37,6 @@ namespace ImageProcessing
                 return this.image.GetLength(0);
             }
         }
-        int fileSize
-        {
-            get
-            {
-                return imageSize + fileDataOffset;
-            }
-        }
         int numberOfColorPlanes;
         int numberOfBitsPerPixel;
         int compressionMethod;
@@ -304,7 +297,7 @@ namespace ImageProcessing
             return Math.Sqrt(Math.Pow(x1 - x2, 2) + Math.Pow(y1 - y2, 2));
         }
 
-        public MyImage Rotation(int degre)
+        public MyImage Rotation(int degrees)
         {
             degrees = degrees % 360;
             double angle = degrees * (Math.PI) / 180f;
@@ -416,7 +409,7 @@ namespace ImageProcessing
             return result;
         }
 
-        public int[,] Convolution (int[,] matrix, float[,] kernel)
+        public static int[,] Convolution (int[,] matrix, float[,] kernel)
         {
             int[,] matrixconv = new int[matrix.GetLength(0), matrix.GetLength(1)];
 
@@ -428,10 +421,14 @@ namespace ImageProcessing
                     {
                         for (int l=0; l<3; l++)
                         {
-                            matrixconv[i, j] = kernel(k,l)*matrix[i-1+l,j-1+k];
-                            Console.Write(matrixconv[i, j]);
+                            if ((i - 1 + l) >= 0 && (i - 1 + l) < matrix.GetLength(0) && (j - 1 + k) >= 0 && (j - 1 + k) < matrix.GetLength(1))
+                            {
+                                matrixconv[i, j] += (int)(kernel[l, k] * matrix[i - 1 + l, j - 1 + k]);
+                            }
+                            
                         }
                     }
+                    Console.Write(matrixconv[i, j]+" ");
                 }
                 Console.WriteLine();
             }
@@ -439,7 +436,7 @@ namespace ImageProcessing
         }
         //Méthode juste pour vérifier la convolution
         //A tej après
-        static void AfficherMatrice(int[,] matrice)
+        public static void AfficherMatrice(int[,] matrice)
         {
             if (matrice == null)
             {

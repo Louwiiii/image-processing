@@ -7,7 +7,9 @@ namespace ImageProcessing
     {
         static void Main(string[] args)
         {
-            MyImage img = new MyImage("Images/coco.bmp");
+            
+            /*MyImage img = new MyImage("Images/coco.bmp");
+            
 
             for (int i = 0; i < 360; i++)
             {
@@ -24,10 +26,10 @@ namespace ImageProcessing
             img.Rotation(90).FromImageToFile("Images/coco24.bmp");
             img.Rotation(90).FromImageToFile("Images/coco23.bmp");
             //MyImage img1 = new MyImage("Images/coco23.bmp");*/
-            int[,] mat = ([[2,1,3,0],[1,1,0,5],[3,3,1,0],[2,0,0,2]]);
-            int[,] ker = ([[1,0,2],[2,1,0],[1,0,3]]);
-            int[,] matconv = Convolution(mat, ker);
-            AfficherMatrice(matconv);
+            int[,] mat = new int[,] {{2,1,3,0},{1,1,0,5},{3,3,1,0},{2,0,0,2}};
+            float[,] ker = new float[,] {{1f,0f,2f},{2f,1f,0f},{1f,0f,3f}};
+            int[,] matconv = MyImage.Convolution(mat, ker);
+            MyImage.AfficherMatrice(matconv);
 
             Console.ReadKey();
 
