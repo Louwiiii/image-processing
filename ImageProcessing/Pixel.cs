@@ -4,15 +4,50 @@ namespace ImageProcessing
     public struct Pixel
     {
 
-        public int R { get; set; }
-        public int G { get; set; }
-        public int B { get; set; }
+        private int r;
+        private int g;
+        private int b;
+        public int R
+        {
+            get
+            {
+                return r;
+            }
+            set
+            {
+                r = Math.Max(0,Math.Min(255,value));
+            }
+        }
+
+        public int G
+        {
+            get
+            {
+                return g;
+            }
+            set
+            {
+                g = Math.Max(0, Math.Min(255, value));
+            }
+        }
+
+        public int B
+        {
+            get
+            {
+                return b;
+            }
+            set
+            {
+                b = Math.Max(0, Math.Min(255, value));
+            }
+        }
 
         public Pixel(int r, int g, int b)
         {
-            this.R = r;
-            this.G = g;
-            this.B = b;
+            this.r = r;
+            this.g = g;
+            this.b = b;
         }
 
         public override string ToString()

@@ -43,7 +43,7 @@ namespace ImageProcessing
         {
             get
             {
-                return (int) (bitmapHeight * bitmapHeight * numberOfBitsPerPixel / 8);
+                return (bitmapWidth * bitmapHeight * (numberOfBitsPerPixel / 8)) + (padding * bitmapHeight);
             }
         }
         int horizontalResolution;
@@ -53,6 +53,15 @@ namespace ImageProcessing
 
         // Image data
         Pixel[,] image;
+
+        // Number of bytes added to each row of pixel
+        int padding
+        {
+            get
+            {
+                return (4 - (numberOfBitsPerPixel * bitmapWidth / 8) % 4) % 4;
+            }
+        }
 
 
         /// <summary>
@@ -98,12 +107,18 @@ namespace ImageProcessing
                 this.numberOfColors = ConvertEndianToInt(bytes.Skip(46).Take(4).ToArray());
                 this.numberOfImportantColors = ConvertEndianToInt(bytes.Skip(50).Take(4).ToArray());
 
+                Console.WriteLine(this.dibHeaderSize + " " + bitmapWidth + " " + bitmapHeight + " " + this.numberOfColorPlanes + " " + this.numberOfBitsPerPixel + " " + this.compressionMethod + " " + imageSize + " " + this.horizontalResolution
+                    + " " + this.verticalResolution + " " + this.numberOfColors + " " + this.numberOfImportantColors);
+
+                Console.WriteLine();
+
                 for (int i = 14; i < 14 + 40; i++)
                 {
                     Console.Write(bytes[i] + " ");
                 }
 
-                
+
+
 
                 byte[] imageData = bytes.Skip(this.fileDataOffset).Take(imageSize).ToArray();
                 this.image = new Pixel[bitmapHeight, bitmapWidth];
@@ -112,13 +127,10 @@ namespace ImageProcessing
                 {
                     for (int j = 0; j < bitmapWidth; j++)
                     {
-                        byte[] pixelData = imageData.Skip(3 * (bitmapWidth * i + j)).Take(3).ToArray();
+                        byte[] pixelData = imageData.Skip(3 * (bitmapWidth * i + j) + padding * i).Take(3).ToArray();
                         this.image[bitmapHeight - i - 1, j] = new Pixel(pixelData[2], pixelData[1], pixelData[0]);
                     }
                 }
-
-                Console.WriteLine(this.dibHeaderSize + " " + this.bitmapWidth + " " + this.bitmapHeight + " " + this.numberOfColorPlanes + " " + this.numberOfBitsPerPixel + " " + this.compressionMethod + " " + this.imageSize + " " + this.horizontalResolution
-                    + " " + this.verticalResolution + " " + this.numberOfColors + " " + this.numberOfImportantColors);
 
                 // Pixel at [0, 0] is the top left pixel
             }
@@ -218,13 +230,12 @@ namespace ImageProcessing
                     fichier.AddRange(pixelData);
                 }
 
-                int k = 0;
-                while ((bitmapWidth * 3 + k) % 4 != 0)
+                for (int k = 0; k < padding; k++)
                 {
                     fichier.Add((byte) 0);
-                    k++;
                 }
             }
+
 
             File.WriteAllBytes(file, fichier.ToArray());
         }
@@ -241,19 +252,29 @@ namespace ImageProcessing
 
         public static byte[] ConvertIntToEndian(int value, uint numberOfBytes)
         {
-            List<byte> tab = BitConverter.GetBytes(value).ToList();
+            byte[] result = new byte[numberOfBytes];
 
-            while (tab.Count < numberOfBytes)
+            for (int i = (int) numberOfBytes - 1; i >= 0; i--)
             {
-                tab.Add(new byte());
+
+                result[i] = (byte) (value / Math.Pow(256, i));
+                value = (int) (value % Math.Pow(256, i));
+
             }
 
-            while (tab.Count > numberOfBytes)
-            {
-                tab.RemoveAt(tab.Count - 1);
-            }
+            //List<byte> tab = BitConverter.GetBytes(value).ToList();
 
-            return tab.ToArray();
+            //while (tab.Count < numberOfBytes)
+            //{
+            //    tab.Add(new byte());
+            //}
+
+            //while (tab.Count > numberOfBytes)
+            //{
+            //    tab.RemoveAt(tab.Count - 1);
+            //}
+
+            return result;
         }
 
         public MyImage Clone()
@@ -301,7 +322,6 @@ namespace ImageProcessing
             degrees = degrees % 360;
             double angle = degrees * (Math.PI) / 180f;
             MyImage result = this.Clone();
-            Console.WriteLine(this.bitmapWidth + " " + this.bitmapHeight);
 
             int height_corner_x = 0;
             int height_corner_y = 0;
@@ -334,7 +354,6 @@ namespace ImageProcessing
             int newBitmapHeight = (int) Math.Abs(2 * Distance(height_corner_x, height_corner_y, 0, 0) * Math.Sin(Math.Atan2(height_corner_y, height_corner_x) + angle));
             int newBitmapWidth = (int) Math.Abs(2 * Distance(width_corner_x, width_corner_y, 0, 0) * Math.Cos(Math.Atan2(width_corner_y, width_corner_x) + angle));
 
-            Console.WriteLine(newBitmapWidth + " " + newBitmapHeight);
             result.image = new Pixel[newBitmapHeight, newBitmapWidth];
 
             double oldX;
@@ -358,11 +377,6 @@ namespace ImageProcessing
                     int oldI = (int) ((bitmapHeight / 2) - oldY);
                     int oldJ = (int) (oldX + (bitmapWidth / 2));
 
-                    if (newI == 181 && newJ == 185)
-                    {
-                        Console.WriteLine(new_x + " " + new_y + " Distance: " + Distance(new_x, new_y, 0, 0)+ " Angle: " + Math.Atan2(new_y - 0, new_x - 0) + " " + oldX + " " + oldY + " " + oldI + " " + oldJ + " Bm width: " + bitmapWidth + " Bm height: " + bitmapHeight);
-                    }
-
                     if (oldJ < 0 || oldI < 0 || oldJ >= bitmapWidth || oldI >= bitmapHeight)
                     {
                         result.image[newI, newJ] = new Pixel(255, 255, 255);
@@ -370,10 +384,6 @@ namespace ImageProcessing
                     else
                     {
                         result.image[newI, newJ] = image[oldI, oldJ];
-                        if (newI == 181 && newJ == 185)
-                        {
-                            Console.WriteLine(newI + " " + newJ + " " + image[oldI, oldJ]);
-                        }
                     }
                 }
             }

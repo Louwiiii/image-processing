@@ -7,12 +7,16 @@ namespace ImageProcessing
     {
         static void Main(string[] args)
         {
+
             MyImage img = new MyImage("Images/coco.bmp");
 
-            for (int i = 0; i < 360; i++)
-            {
-                img.Rotation(i).FromImageToFile("Images/Rotation/cocoRotated" + i + ".bmp");
-            }
+            int i = 30;
+            img.Rotation(i).FromImageToFile("Images/cocoRotated" + i + ".bmp");
+
+            MyImage img3 = new MyImage("Images/cocoRotated30.bmp");
+
+            img3.FromImageToFile("Images/cocoRotatedTest.bmp");
+            
             
 
             img.EffetMiroir(0).FromImageToFile("Images/coco22.bmp");
@@ -25,9 +29,6 @@ namespace ImageProcessing
             //MyImage img1 = new MyImage("Images/coco23.bmp");
             
             Console.ReadKey();
-
-
-
         }
     }
 }
