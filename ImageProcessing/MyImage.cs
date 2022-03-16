@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
@@ -17,6 +17,7 @@ namespace ImageProcessing
                 return imageSize + fileDataOffset;
             }
         }
+        
         int fileDataOffset;
 
 
@@ -322,6 +323,7 @@ namespace ImageProcessing
             degrees = degrees % 360;
             double angle = degrees * (Math.PI) / 180f;
             MyImage result = this.Clone();
+<<<<<<< HEAD
 
             int height_corner_x = 0;
             int height_corner_y = 0;
@@ -360,9 +362,17 @@ namespace ImageProcessing
             double oldY;
             
             for (int newI = 0; newI < result.bitmapHeight; newI++)
+=======
+            /*result.bitmapWidth = (int) (Math.Sin(angle)*this.bitmapHeight + Math.Cos(angle)*this.bitmapWidth);
+            result.bitmapHeight = (int)(Math.Cos(angle) * this.bitmapHeight + Math.Sin(angle) * this.bitmapWidth);
+            result.fileSize = result.bitmapWidth * result.bitmapHeight * 3 + 54;
+            result.imageSize = result.fileSize - 54;
+            for (int i = 0; i < result.bitmapWidth; i++)
+>>>>>>> origin/master
             {
-                for (int newJ = 0; newJ < result.bitmapWidth; newJ++)
+                for (int j = 0; j < result.bitmapHeight; j++)
                 {
+<<<<<<< HEAD
                     //x = (int)(Math.Sin(angle) * i + Math.Cos(angle) * j);
                     //y = (int)(Math.Sin(angle) * (this.bitmapWidth - j) + Math.Cos(angle) * i);
 
@@ -385,9 +395,11 @@ namespace ImageProcessing
                     {
                         result.image[newI, newJ] = image[oldI, oldJ];
                     }
+=======
+                    result.image[(int)(Math.Sin(angle)* (this.bitmapWidth-j) + Math.Cos(angle)*i),(int) (Math.Sin(angle) *i + Math.Cos(angle) * j)] = image[i, j];
+>>>>>>> origin/master
                 }
-            }
-            
+            }*/
             return result;
         }
 
@@ -484,10 +496,66 @@ namespace ImageProcessing
             return result;
         }
 
-        public int[,] Convolution (int[,] matrix, float[,] kernel)
+        public static int[,] Convolution (int[,] matrix, float[,] kernel)
         {
+            int[,] matrixconv = new int[matrix.GetLength(0), matrix.GetLength(1)];
+
+            for (int i=0; i < matrix.GetLength(0); i++)
+            {
+                for (int j=0; j< matrix.GetLength(1); j++)
+                {
+                    for (int k=0; k<3; k++)
+                    {
+                        for (int l=0; l<3; l++)
+                        {
+                            if ((i - 1 + l) >= 0 && (i - 1 + l) < matrix.GetLength(0) && (j - 1 + k) >= 0 && (j - 1 + k) < matrix.GetLength(1))
+                            {
+                                matrixconv[i, j] += (int)(kernel[l, k] * matrix[i - 1 + l, j - 1 + k]);
+                            }
+                            
+                        }
+                    }
+                    Console.Write(matrixconv[i, j]+" ");
+                }
+                Console.WriteLine();
+            }
             return null;
         }
+        //Méthode juste pour vérifier la convolution
+        //A tej après
+        public static void AfficherMatrice(int[,] matrice)
+        {
+            if (matrice == null)
+            {
+                Console.WriteLine("Matrice null");
+            }
+            else if (matrice.GetLength(0) == 0 && matrice.GetLength(1) == 0)
+            {
+                Console.WriteLine("Matrice vide");
+            }
+            else
+            {
+                for (int j = 0; j < matrice.GetLength(0); j++)
+                {
+                    for (int i = 0; i < matrice.GetLength(1); i++)
+                    {
+                        int aff = matrice[j, i];
+                        if (aff >= 10)
+                        {
+                            Console.Write(aff);
+                        }
+                        else
+                        {
+                            Console.Write(" " + aff);
+                        }
+                        Console.Write(" ");
+                    }
+                    Console.WriteLine();
+                }
+            }
+
+        }
+
 
     }
 }
