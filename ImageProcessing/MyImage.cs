@@ -323,7 +323,6 @@ namespace ImageProcessing
             degrees = degrees % 360;
             double angle = degrees * (Math.PI) / 180f;
             MyImage result = this.Clone();
-<<<<<<< HEAD
 
             int height_corner_x = 0;
             int height_corner_y = 0;
@@ -360,32 +359,24 @@ namespace ImageProcessing
 
             double oldX;
             double oldY;
-            
+
             for (int newI = 0; newI < result.bitmapHeight; newI++)
-=======
-            /*result.bitmapWidth = (int) (Math.Sin(angle)*this.bitmapHeight + Math.Cos(angle)*this.bitmapWidth);
-            result.bitmapHeight = (int)(Math.Cos(angle) * this.bitmapHeight + Math.Sin(angle) * this.bitmapWidth);
-            result.fileSize = result.bitmapWidth * result.bitmapHeight * 3 + 54;
-            result.imageSize = result.fileSize - 54;
-            for (int i = 0; i < result.bitmapWidth; i++)
->>>>>>> origin/master
             {
-                for (int j = 0; j < result.bitmapHeight; j++)
+                for (int newJ = 0; newJ < result.bitmapWidth; newJ++)
                 {
-<<<<<<< HEAD
                     //x = (int)(Math.Sin(angle) * i + Math.Cos(angle) * j);
                     //y = (int)(Math.Sin(angle) * (this.bitmapWidth - j) + Math.Cos(angle) * i);
 
                     // Center is in (0, 0)
 
-                    double new_x = newJ - (newBitmapWidth/2);
-                    double new_y = (newBitmapHeight/2) - newI;
+                    double new_x = newJ - (newBitmapWidth / 2);
+                    double new_y = (newBitmapHeight / 2) - newI;
 
-                    oldX = (Distance(new_x, new_y, 0, 0) * Math.Cos(Math.Atan2(new_y - 0, new_x - 0) - angle)) ;
+                    oldX = (Distance(new_x, new_y, 0, 0) * Math.Cos(Math.Atan2(new_y - 0, new_x - 0) - angle));
                     oldY = (Distance(new_x, new_y, 0, 0) * Math.Sin(Math.Atan2(new_y - 0, new_x - 0) - angle));
 
-                    int oldI = (int) ((bitmapHeight / 2) - oldY);
-                    int oldJ = (int) (oldX + (bitmapWidth / 2));
+                    int oldI = (int)((bitmapHeight / 2) - oldY);
+                    int oldJ = (int)(oldX + (bitmapWidth / 2));
 
                     if (oldJ < 0 || oldI < 0 || oldJ >= bitmapWidth || oldI >= bitmapHeight)
                     {
@@ -395,11 +386,12 @@ namespace ImageProcessing
                     {
                         result.image[newI, newJ] = image[oldI, oldJ];
                     }
-=======
-                    result.image[(int)(Math.Sin(angle)* (this.bitmapWidth-j) + Math.Cos(angle)*i),(int) (Math.Sin(angle) *i + Math.Cos(angle) * j)] = image[i, j];
->>>>>>> origin/master
+
+                    //result.image[(int)(Math.Sin(angle) * (this.bitmapWidth - newJ) + Math.Cos(angle) * newI), (int)(Math.Sin(angle) * newI + Math.Cos(angle) * newJ)] = image[newI, newJ];
+
                 }
-            }*/
+                
+            }
             return result;
         }
 
@@ -471,7 +463,9 @@ namespace ImageProcessing
                 resultChannels[i] = Convolution(channels[i], kernel) ;
             }
 
-            return null;
+            result.SetChannels(resultChannels);
+
+            return result;
         }
 
         public int[][,] GetChannels ()
@@ -496,65 +490,77 @@ namespace ImageProcessing
             return result;
         }
 
+        public void SetChannels(int[][,] channels)
+        {
+            for (int i = 0; i < this.bitmapHeight; i++)
+            {
+                for (int j = 0; j < this.bitmapWidth; j++)
+                {
+                    this.image[i, j].R = channels[0][i, j];
+                    this.image[i, j].G = channels[1][i, j];
+                    this.image[i, j].B = channels[2][i, j];
+                }
+            }
+        }
+
         public static int[,] Convolution (int[,] matrix, float[,] kernel)
         {
-            int[,] matrixconv = new int[matrix.GetLength(0), matrix.GetLength(1)];
+            int[,] result = new int[matrix.GetLength(0), matrix.GetLength(1)];
 
             for (int i=0; i < matrix.GetLength(0); i++)
             {
                 for (int j=0; j< matrix.GetLength(1); j++)
                 {
-                    for (int k=0; k<3; k++)
+                    for (int k=0; k < kernel.GetLength(1); k++)
                     {
-                        for (int l=0; l<3; l++)
+                        for (int l=0; l< kernel.GetLength(0); l++)
                         {
-                            if ((i - 1 + l) >= 0 && (i - 1 + l) < matrix.GetLength(0) && (j - 1 + k) >= 0 && (j - 1 + k) < matrix.GetLength(1))
+                            if ((i - (kernel.GetLength(0)/2) + l) >= 0 && (i - (kernel.GetLength(0) / 2) + l) < matrix.GetLength(0) && (j - (kernel.GetLength(1) / 2) + k) >= 0 && (j - (kernel.GetLength(1) / 2) + k) < matrix.GetLength(1))
                             {
-                                matrixconv[i, j] += (int)(kernel[l, k] * matrix[i - 1 + l, j - 1 + k]);
+                                result[i, j] += (int)(kernel[l, k] * matrix[i - (kernel.GetLength(0) / 2) + l, j - (kernel.GetLength(1) / 2) + k]);
                             }
                             
                         }
                     }
-                    Console.Write(matrixconv[i, j]+" ");
                 }
-                Console.WriteLine();
             }
-            return null;
+            return result;
         }
-        //Méthode juste pour vérifier la convolution
-        //A tej après
-        public static void AfficherMatrice(int[,] matrice)
+
+        public MyImage Blur ()
         {
-            if (matrice == null)
-            {
-                Console.WriteLine("Matrice null");
-            }
-            else if (matrice.GetLength(0) == 0 && matrice.GetLength(1) == 0)
-            {
-                Console.WriteLine("Matrice vide");
-            }
-            else
-            {
-                for (int j = 0; j < matrice.GetLength(0); j++)
-                {
-                    for (int i = 0; i < matrice.GetLength(1); i++)
-                    {
-                        int aff = matrice[j, i];
-                        if (aff >= 10)
-                        {
-                            Console.Write(aff);
-                        }
-                        else
-                        {
-                            Console.Write(" " + aff);
-                        }
-                        Console.Write(" ");
-                    }
-                    Console.WriteLine();
-                }
-            }
+            return Convoluted(new float[,] { { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f  },{ 1 / 9f, 1 / 9f, 1 / 9f  } });
+        }
+
+        public MyImage BorderDetection()
+        {
+            return Convoluted(new float[,] { { 0, 1, 0 }, { 1, -4, 1 }, { 0, 1, 0 } });
+        }
+
+
+        public MyImage EdgeReinforcement()
+        {
+            return Convoluted(new float[,] { { 0, 0, 0 }, { -1, 1, 0 }, { 0, 0, 0 } });
+        }
+
+        public MyImage RandomKernel()
+        {
+            return Convoluted(new float[,] { { 1, 2, 3 }, { -8, -10, -12 }, { 7, 8, 9 } });
+            //return Convoluted(new float[,] { { 68, -68, 68 }, { -68, 0, -68 }, { 68, -68, 68 } });
+        }
+
+        public MyImage MotionBlur()
+        {
+            //return Convoluted(new float[,] { { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, { 1/5f, 1/5f, 1/5f, 1/5f, 1/5f }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 } });
+            return Convoluted(new float[,] { { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 } });
 
         }
+
+        public MyImage Repoussage()
+        {
+            return Convoluted(new float[,] { { -2, -1, 0 }, { -1, 1, 1 }, { 0, 1, 2 } });
+        }
+
 
 
     }

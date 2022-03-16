@@ -10,6 +10,13 @@ namespace ImageProcessing
 
             MyImage img = new MyImage("Images/coco.bmp");
 
+            img.Blur().FromImageToFile("Images/cocoflou.bmp");
+            img.BorderDetection().FromImageToFile("Images/cocoborder.bmp");
+
+            img.RandomKernel().FromImageToFile("Images/randomkernel.bmp");
+
+            img.Repoussage().FromImageToFile("Images/cocorepoussage.bmp");
+
 
             int i = 30;
             img.Rotation(i).FromImageToFile("Images/cocoRotated" + i + ".bmp");
@@ -32,7 +39,7 @@ namespace ImageProcessing
             int[,] mat = new int[,] {{2,1,3,0},{1,1,0,5},{3,3,1,0},{2,0,0,2}};
             float[,] ker = new float[,] {{1f,0f,2f},{2f,1f,0f},{1f,0f,3f}};
             int[,] matconv = MyImage.Convolution(mat, ker);
-            MyImage.AfficherMatrice(matconv);
+            
 
             Console.ReadKey();
         }
