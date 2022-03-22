@@ -610,38 +610,69 @@ namespace ImageProcessing
 
             for (int j = margin; j < width-margin; j++)
             {
+                // Iterate through the 3 color channels
+                for (int k = 0; k < 3; k++)
+                {
+                    int valueCount = colorValuesCounts[k, ((j - margin) * 255) / (width - 2 * margin)]; // The count of this value of this color
+                    for (int i = height - margin - 1; i >= margin; i--)
+                    {
+                        int rowValue = (height - margin - i) * maxCount / (height - 2 * margin) ; // The value corresponding to the y of the pixel on the histogram (relative to the scale of the y axis)
 
+                        if (rowValue > valueCount)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            switch (k)
+                            {
+                                case 0:
+                                    result.image[i, j].R = 255;
+                                    break;
+
+                                case 1:
+                                    result.image[i, j].G = 255;
+                                    break;
+
+                                case 2:
+                                    result.image[i, j].B = 255;
+                                    break;
+                            }
+                                
+                        }
+                    }
+                }
             }
-            return null;
+            return result;
         }
 
-        public static MyImage Fractale(int width, int heigth)
+        public static MyImage Mandelbrot(int width, int height)
         {
-            MyImage fract = new MyImage(width, heigth);
+            MyImage fract = new MyImage(width, height);
             Complex coordonnees = new Complex(0,0);
+
+            double rectWidth = 4f;
+            double rectHeight = 4f;
             
-            for (int i=0 ; i < heigth; i++)
+            for (int i=0 ; i < height; i++)
             {
                 for (int j=0 ; j < width; j++)
                 {
                     Complex z = new Complex(0, 0);
-                    double x = (j - width / 2f) / (width / 4f);
-                    double y = (heigth / 2f - i) / (heigth / 4f);
+                    double x = (j * rectWidth / width) - (rectWidth / 2);
+                    double y = (rectHeight / 2) - (i * rectHeight / height);
+
                     coordonnees = new Complex(x, y);
                     for (int k = 0; k < 100; k++)
                     {
                         z = (z * z) + coordonnees;
+                        double moduleZ = Math.Sqrt(z.Real * z.Real + z.Imaginary * z.Imaginary);
+                        if (moduleZ > 2)
+                        {
+                            fract.image[i, j] = new Pixel(255, 255, 255);
+                            break;
+                        }
                     }
-                    double moduleZ = Math.Sqrt(z.Real*z.Real + z.Imaginary*z.Imaginary);
-                    if (moduleZ > 2){
-                        fract.image[i, j] = new Pixel(255, 255, 255);
-                    }
-                    else
-                    {
-                        fract.image[i, j] = new Pixel(0, 0, 0);
-                    }
-
-
                 }
             }
             return fract;
