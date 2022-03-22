@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace ImageProcessing
 {
@@ -614,7 +615,21 @@ namespace ImageProcessing
             return null;
         }
 
+        public MyImage Fractale()
+        {
+            MyImage fract = new MyImage();
+            Complex coordonnees = new Complex(,);
+            Complex z0 = new Complex(fract.image.GetLength(0)/2,fract.image.GetLength(1)/2);
+            for (int i=0 ; i < fract.image.GetLength(0); i++)
+            {
+                for (int j=0; j < fract.image.GetLength(1); j++)
+                {
+        
 
+
+                }
+            }
+        }
 
     }
 }
