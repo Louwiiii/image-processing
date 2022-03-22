@@ -615,20 +615,36 @@ namespace ImageProcessing
             return null;
         }
 
-        public MyImage Fractale()
+        public static MyImage Fractale(int width, int heigth)
         {
-            MyImage fract = new MyImage();
-            Complex coordonnees = new Complex(,);
-            Complex z0 = new Complex(fract.image.GetLength(0)/2,fract.image.GetLength(1)/2);
-            for (int i=0 ; i < fract.image.GetLength(0); i++)
+            MyImage fract = new MyImage(width, heigth);
+            Complex coordonnees = new Complex(0,0);
+            
+            for (int i=0 ; i < heigth; i++)
             {
-                for (int j=0; j < fract.image.GetLength(1); j++)
+                for (int j=0 ; j < width; j++)
                 {
-        
+                    Complex z = new Complex(0, 0);
+                    double x = (j - width / 2f) / (width / 4f);
+                    double y = (heigth / 2f - i) / (heigth / 4f);
+                    coordonnees = new Complex(x, y);
+                    for (int k = 0; k < 100; k++)
+                    {
+                        z = (z * z) + coordonnees;
+                    }
+                    double moduleZ = Math.Sqrt(z.Real*z.Real + z.Imaginary*z.Imaginary);
+                    if (moduleZ > 2){
+                        fract.image[i, j] = new Pixel(255, 255, 255);
+                    }
+                    else
+                    {
+                        fract.image[i, j] = new Pixel(0, 0, 0);
+                    }
 
 
                 }
             }
+            return fract;
         }
 
     }

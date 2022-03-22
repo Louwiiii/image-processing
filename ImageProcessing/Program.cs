@@ -8,7 +8,7 @@ namespace ImageProcessing
         static void Main(string[] args)
         {
 
-            MyImage img = new MyImage("Images/coco.bmp");
+            /*MyImage img = new MyImage("Images/coco.bmp");
 
             img.Blur().FromImageToFile("Images/cocoflou.bmp");
             img.BorderDetection().FromImageToFile("Images/cocoborder.bmp");
@@ -35,11 +35,12 @@ namespace ImageProcessing
             img2.FromImageToFile("Images/cocoResized.bmp");
             img.Rotation(90).FromImageToFile("Images/coco24.bmp");
             img.Rotation(90).FromImageToFile("Images/coco23.bmp");
-            //MyImage img1 = new MyImage("Images/coco23.bmp");*/
+            //MyImage img1 = new MyImage("Images/coco23.bmp");
             int[,] mat = new int[,] {{2,1,3,0},{1,1,0,5},{3,3,1,0},{2,0,0,2}};
             float[,] ker = new float[,] {{1f,0f,2f},{2f,1f,0f},{1f,0f,3f}};
-            int[,] matconv = MyImage.Convolution(mat, ker);
-            
+            int[,] matconv = MyImage.Convolution(mat, ker);*/
+
+            MyImage.Fractale(400, 400).FromImageToFile("Images/fractale.bmp");
 
             Console.ReadKey();
         }
