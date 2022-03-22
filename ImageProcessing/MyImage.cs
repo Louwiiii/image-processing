@@ -173,6 +173,25 @@ namespace ImageProcessing
             }
         }
 
+        /// <summary>
+        /// Create a new MyImage from scratch
+        /// </summary>
+        public MyImage(int width, int height, string fileType = "BM", int fileDataOffset = 54, int dibHeaderSize = 40, int numberOfColorPlanes = 1, int numberOfBitsPerPixel = 24, int compressionMethod = 0, int horizontalResolution = 11811, int verticalResolution = 11811, int numberOfColors = 0, int numberOfImportantColors = 0)
+        {
+            this.image = new Pixel[height, width];
+            this.fileType = fileType;
+            this.fileDataOffset = fileDataOffset;
+            this.dibHeaderSize = dibHeaderSize;
+            this.numberOfColorPlanes = numberOfColorPlanes;
+            this.numberOfBitsPerPixel = numberOfBitsPerPixel;
+            this.compressionMethod = compressionMethod;
+            this.horizontalResolution = horizontalResolution;
+            this.verticalResolution = verticalResolution;
+            this.numberOfColors = numberOfColors;
+            this.numberOfImportantColors = numberOfImportantColors;
+
+        }
+
         public void FromImageToFile(string file)
         {
             List<byte> fichier = new List<byte>();
@@ -519,7 +538,6 @@ namespace ImageProcessing
                             {
                                 result[i, j] += (int)(kernel[l, k] * matrix[i - (kernel.GetLength(0) / 2) + l, j - (kernel.GetLength(1) / 2) + k]);
                             }
-                            
                         }
                     }
                 }
@@ -559,6 +577,12 @@ namespace ImageProcessing
         public MyImage Repoussage()
         {
             return Convoluted(new float[,] { { -2, -1, 0 }, { -1, 1, 1 }, { 0, 1, 2 } });
+        }
+
+        public MyImage Histogram()
+        {
+            MyImage result = new MyImage(256 + 100, 100);
+            return null;
         }
 
 
