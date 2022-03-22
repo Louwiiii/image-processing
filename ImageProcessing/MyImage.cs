@@ -579,9 +579,38 @@ namespace ImageProcessing
             return Convoluted(new float[,] { { -2, -1, 0 }, { -1, 1, 1 }, { 0, 1, 2 } });
         }
 
-        public MyImage Histogram()
+        public MyImage Histogram(int width, int height, int margin = 50)
         {
-            MyImage result = new MyImage(256 + 100, 100);
+            MyImage result = new MyImage(width, height);
+
+            int[,] colorValuesCounts = new int[3,256]; // The count of each value for each color
+
+            int maxCount = 0; // The highest peak of the histogram
+
+            for (int i = 0; i < bitmapHeight; i++)
+            {
+                for (int j = 0; j < bitmapWidth; j++)
+                {
+                    colorValuesCounts[0, image[i, j].R]++;
+                    colorValuesCounts[1, image[i, j].G]++;
+                    colorValuesCounts[2, image[i, j].B]++;
+                }
+            }
+
+            // Find maximum of the valueCounts
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 256; j++)
+                {
+                    if (colorValuesCounts[i, j] > maxCount)
+                        maxCount = colorValuesCounts[i, j];
+                }
+            }
+
+            for (int j = margin; j < width-margin; j++)
+            {
+
+            }
             return null;
         }
 
