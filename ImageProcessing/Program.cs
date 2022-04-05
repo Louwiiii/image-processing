@@ -9,6 +9,8 @@ namespace ImageProcessing
         {
 
             MyImage img = new MyImage("Images/coco.bmp");
+            MyImage fract = MyImage.Mandelbrot(320, 200);
+            img.EffetMiroir(0).Hide(fract).DiscoverImage().Item2.FromImageToFile("Images/discovered.bmp");
             img.Histogram(500, 300).FromImageToFile("Images/histo.bmp");
             /*
             img.Blur().FromImageToFile("Images/cocoflou.bmp");
@@ -41,7 +43,7 @@ namespace ImageProcessing
             float[,] ker = new float[,] {{1f,0f,2f},{2f,1f,0f},{1f,0f,3f}};
             int[,] matconv = MyImage.Convolution(mat, ker);*/
 
-            MyImage.Mandelbrot(400, 400).FromImageToFile("Images/fractale.bmp");
+            MyImage.Mandelbrot(320, 200).FromImageToFile("Images/fractale.bmp");
 
             QRCode.Generate("te/st");
 
