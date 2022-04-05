@@ -10,7 +10,7 @@ namespace ImageProcessing
 
             MyImage img = new MyImage("Images/coco.bmp");
             MyImage fract = MyImage.Mandelbrot(320, 200);
-            img.EffetMiroir(0).Hide(fract).FromImageToFile("Images/hide2.bmp");
+            img.EffetMiroir(0).Hide(fract).DiscoverImage().Item2.FromImageToFile("Images/discovered.bmp");
             img.Histogram(500, 300).FromImageToFile("Images/histo.bmp");
             /*
             img.Blur().FromImageToFile("Images/cocoflou.bmp");

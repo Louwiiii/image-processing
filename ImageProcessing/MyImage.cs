@@ -696,5 +696,29 @@ namespace ImageProcessing
         }
         
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>Hidden image and container image</returns>
+        public (MyImage, MyImage) DiscoverImage()
+        {
+            MyImage imagecachee = this.Clone();
+            MyImage imagecachante = this.Clone();
+            for (int i = 0; i < imagecachante.image.GetLength(0); i++)
+            {
+                for (int j = 0; j < imagecachante.image.GetLength(1); j++)
+                {
+                    imagecachante.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4)+ "0000", 2);
+                    imagecachante.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
+                    imagecachante.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
+
+                    imagecachee.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].R), 2).PadLeft(8, '0').Substring(4, 4) + "0000", 2);
+                    imagecachee.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].G), 2).PadLeft(8, '0').Substring(4, 4) + "0000", 2);
+                    imagecachee.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].B), 2).PadLeft(8, '0').Substring(4, 4) + "0000", 2);
+                }
+            }
+            return (imagecachee, imagecachante);
+        }
+
     }
 }
