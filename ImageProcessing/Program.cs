@@ -43,6 +43,8 @@ namespace ImageProcessing
 
             MyImage.Mandelbrot(400, 400).FromImageToFile("Images/fractale.bmp");
 
+            QRCode.Generate("te/st");
+
             Console.ReadKey();
         }
     }

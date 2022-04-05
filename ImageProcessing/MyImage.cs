@@ -678,5 +678,9 @@ namespace ImageProcessing
             return fract;
         }
 
+        public static MyImage HideIn(MyImage containerImage)
+        {
+            return null;
+        }
     }
 }
