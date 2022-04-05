@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -677,6 +678,23 @@ namespace ImageProcessing
             }
             return fract;
         }
+        public MyImage Hide (MyImage imagecachante)
+        {
+            MyImage imagecachee = this;
+            MyImage nouvelleimage = imagecachante.Clone();
+            //il faut vérif que les images aient la même hauteur ? 
+            for (int i = 0; i < imagecachante.image.GetLength(0); i++)
+            {
+                for (int j = 0; j < imagecachante.image.GetLength(1); j++)
+                {
+                    nouvelleimage.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)imagecachante.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)imagecachee.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                    nouvelleimage.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)imagecachante.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)imagecachee.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                    nouvelleimage.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)imagecachante.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)imagecachee.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                }
+            }
+            return nouvelleimage;
+        }
+        
 
     }
 }
