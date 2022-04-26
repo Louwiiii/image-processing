@@ -57,7 +57,7 @@ namespace ImageProcessing
 
         public Pixel ToGrey()
         {
-            return new Pixel((R+G+B)/3, (R + G + B) / 3, (R + G + B) / 3);
+            return new Pixel((R + G + B) / 3, (R + G + B) / 3, (R + G + B) / 3);
         }
 
         public Pixel ToBlackOrWhite()
