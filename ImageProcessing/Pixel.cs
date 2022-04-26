@@ -43,6 +43,28 @@ namespace ImageProcessing
             }
         }
 
+        /// <summary>
+        /// Get the value of the highest color
+        /// </summary>
+        public int Max
+        {
+            get
+            {
+                return Math.Max(Math.Max(R, G), B);
+            }
+        }
+
+        /// <summary>
+        /// Get the value of the lowest color
+        /// </summary>
+        public int Min
+        {
+            get
+            {
+                return Math.Min(Math.Min(R, G), B);
+            }
+        }
+
         public Pixel(int r, int g, int b)
         {
             this.r = r;

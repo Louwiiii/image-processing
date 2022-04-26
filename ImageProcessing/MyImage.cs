@@ -55,7 +55,7 @@ namespace ImageProcessing
         int numberOfImportantColors;
 
         // Image data
-        Pixel[,] image;
+        public Pixel[,] image;
 
         // Number of bytes added to each row of pixel
         int padding
@@ -208,7 +208,7 @@ namespace ImageProcessing
             fichier.AddRange(ConvertIntToEndian(this.fileSize, 4));
 
             //ajout de 4 bytes de réserve
-            fichier.AddRange(new byte[] { new byte(), new byte(), new byte(), new byte()});
+            fichier.AddRange(new byte[] { 0, 0, 0, 0 });
 
             //this.fileDataOffset
             fichier.AddRange(ConvertIntToEndian(this.fileDataOffset, 4));
@@ -334,7 +334,7 @@ namespace ImageProcessing
             return result;
         }
 
-        public static double Distance (double x1, double y1, double x2, double y2)
+        public static double Distance(double x1, double y1, double x2, double y2)
         {
             return Math.Sqrt(Math.Pow(x1 - x2, 2) + Math.Pow(y1 - y2, 2));
         }
@@ -464,7 +464,7 @@ namespace ImageProcessing
             {
                 for (int j = 0; j < result.bitmapWidth; j++)
                 {
-                    result.image[i, j] = this.image[(int)(i * 1.0f / result.bitmapHeight * this.bitmapHeight), (int)(j * 1.0f / result.bitmapWidth * this.bitmapWidth)];
+                     result.image[i, j] = this.image[(int) (i * (double) this.bitmapHeight / result.bitmapHeight), (int) (j * (double) this.bitmapWidth / result.bitmapWidth)];
                 }
             }
 
