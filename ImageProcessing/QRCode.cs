@@ -367,7 +367,7 @@ namespace ImageProcessing
                 }
 
                 // Skip vertical timing
-                if (column == 7 || column == 6)
+                if (column == 6)
                     column = 5;
             }
 
@@ -397,7 +397,6 @@ namespace ImageProcessing
             }
 
             formatString += Convert.ToString(maskIndex, 2).PadLeft(3, '0');
-
 
 
             // Error correction bits
@@ -621,11 +620,11 @@ namespace ImageProcessing
         {
             Pixel[,] matrix = image.image;
 
-            int moduleSize = 1; // Size of a module in pixels (only integers)
+            int moduleSize; // Size of a module in pixels (only integers)
             int threshold = 10; // Threshold for pixel to be considered as black (under 10) or white (above 245)
 
             int size = matrix.GetLength(0); // The size in pixels of the QR Code
-            (int, int) topLeft = (0, 0); // Line and column of the top left pixel of the QR Code
+            (int, int) topLeft; // Line and column of the top left pixel of the QR Code
             (int, int) bottomRight = (matrix.GetLength(0) - 1, matrix.GetLength(1) - 1);
 
             // Find the Finder patterns
@@ -659,6 +658,9 @@ namespace ImageProcessing
                     }
                 }
             }
+
+            // QR Code not found
+            return null;
 
         Extract:
 
@@ -705,7 +707,6 @@ namespace ImageProcessing
 
         public static string DecodeData(string databits, int version)
         {
-            Console.WriteLine(databits);
             string message = databits.Substring(0, GetMaxNumberOfBits(version));
             string ecc = databits.Substring(GetMaxNumberOfBits(version), (databits.Length - message.Length) - databits.Length%8);
 
@@ -744,7 +745,6 @@ namespace ImageProcessing
                     int code = Convert.ToInt32(messageBits.Substring(i*11, 11), 2);
                     result += DecodeChar((int) (code / 45));
                     result += DecodeChar(code % 45);
-                    Console.WriteLine(result);
                 }
                 if (characterCount % 2 != 0)
                 {
@@ -768,7 +768,6 @@ namespace ImageProcessing
                 for (int i = 0; i < characterCount; i++)
                 {
                     result += (char) Convert.ToByte(messageBits.Substring(i * 8, 8), 2);
-                    Console.WriteLine(result);
                 }
             }
             else

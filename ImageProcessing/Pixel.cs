@@ -7,6 +7,7 @@ namespace ImageProcessing
         private int r;
         private int g;
         private int b;
+        private int a;
         public int R
         {
             get
@@ -43,6 +44,18 @@ namespace ImageProcessing
             }
         }
 
+        public int A
+        {
+            get
+            {
+                return a;
+            }
+            set
+            {
+                a = Math.Max(0, Math.Min(255, value));
+            }
+        }
+
         /// <summary>
         /// Get the value of the highest color
         /// </summary>
@@ -65,11 +78,12 @@ namespace ImageProcessing
             }
         }
 
-        public Pixel(int r, int g, int b)
+        public Pixel(int r, int g, int b, int a = 0)
         {
             this.r = r;
             this.g = g;
             this.b = b;
+            this.a = a;
         }
 
         public override string ToString()

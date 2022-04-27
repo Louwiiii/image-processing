@@ -19,7 +19,7 @@ namespace ImageProcessing
                 return imageSize + fileDataOffset;
             }
         }
-        
+
         int fileDataOffset;
 
 
@@ -41,6 +41,14 @@ namespace ImageProcessing
         }
         int numberOfColorPlanes;
         int numberOfBitsPerPixel;
+        int numberOfBytesPerPixel
+        {
+            get
+            {
+                return numberOfBitsPerPixel / 8;
+            }
+        }
+
         int compressionMethod;
         int imageSize
         {
@@ -72,74 +80,63 @@ namespace ImageProcessing
         /// </summary>
         public MyImage(string filepath)
         {
-            try
+            byte[] bytes;
+
+            bytes = File.ReadAllBytes(filepath);
+
+            Console.WriteLine("\nFile header");
+
+            this.fileType = ((char)bytes[0]).ToString() + ((char)bytes[1]).ToString();
+
+            int fileSize = ConvertEndianToInt(bytes.Skip(2).Take(4).ToArray());
+
+            this.fileDataOffset = ConvertEndianToInt(bytes.Skip(10).Take(4).ToArray());
+
+            Console.WriteLine(fileType + " " + fileSize + " " + fileDataOffset);
+
+            for (int i = 0; i < 14; i++)
             {
-                byte[] bytes = File.ReadAllBytes(filepath);
-
-                Console.WriteLine("\nFile header");
-
-                this.fileType = ((char)bytes[0]).ToString() + ((char)bytes[1]).ToString();
-
-                int fileSize = ConvertEndianToInt(bytes.Skip(2).Take(4).ToArray());
-
-                this.fileDataOffset = ConvertEndianToInt(bytes.Skip(10).Take(4).ToArray());
-
-                Console.WriteLine(fileType + " " + fileSize + " " + fileDataOffset);
-
-                for (int i = 0; i < 14; i++)
-                {
-                    Console.Write(bytes[i] + " ");
-                }
-
-                Console.WriteLine("\n\nImage header");
-
-                this.dibHeaderSize = ConvertEndianToInt(bytes.Skip(14).Take(4).ToArray());
-
-                int bitmapWidth = ConvertEndianToInt(bytes.Skip(18).Take(4).ToArray());
-                int bitmapHeight = ConvertEndianToInt(bytes.Skip(22).Take(4).ToArray());
-
-                this.numberOfColorPlanes = ConvertEndianToInt(bytes.Skip(26).Take(2).ToArray());
-                this.numberOfBitsPerPixel = ConvertEndianToInt(bytes.Skip(28).Take(2).ToArray());
-                this.compressionMethod = ConvertEndianToInt(bytes.Skip(30).Take(4).ToArray());
-
-                int imageSize = ConvertEndianToInt(bytes.Skip(34).Take(4).ToArray());
-
-                this.horizontalResolution = ConvertEndianToInt(bytes.Skip(38).Take(4).ToArray());
-                this.verticalResolution = ConvertEndianToInt(bytes.Skip(42).Take(4).ToArray());
-
-                this.numberOfColors = ConvertEndianToInt(bytes.Skip(46).Take(4).ToArray());
-                this.numberOfImportantColors = ConvertEndianToInt(bytes.Skip(50).Take(4).ToArray());
-
-                Console.WriteLine(this.dibHeaderSize + " " + bitmapWidth + " " + bitmapHeight + " " + this.numberOfColorPlanes + " " + this.numberOfBitsPerPixel + " " + this.compressionMethod + " " + imageSize + " " + this.horizontalResolution
-                    + " " + this.verticalResolution + " " + this.numberOfColors + " " + this.numberOfImportantColors);
-
-                Console.WriteLine();
-
-                for (int i = 14; i < 14 + 40; i++)
-                {
-                    Console.Write(bytes[i] + " ");
-                }
-
-
-
-
-                byte[] imageData = bytes.Skip(this.fileDataOffset).Take(imageSize).ToArray();
-                this.image = new Pixel[bitmapHeight, bitmapWidth];
-
-                for (int i = 0; i < bitmapHeight; i++)
-                {
-                    for (int j = 0; j < bitmapWidth; j++)
-                    {
-                        byte[] pixelData = imageData.Skip(3 * (bitmapWidth * i + j) + padding * i).Take(3).ToArray();
-                        this.image[bitmapHeight - i - 1, j] = new Pixel(pixelData[2], pixelData[1], pixelData[0]);
-                    }
-                }
-
-                // Pixel at [0, 0] is the top left pixel
+                Console.Write(bytes[i] + " ");
             }
-            catch (Exception e)
+
+            Console.WriteLine("\n\nImage header");
+
+            this.dibHeaderSize = ConvertEndianToInt(bytes.Skip(14).Take(4).ToArray());
+
+            int bitmapWidth = ConvertEndianToInt(bytes.Skip(18).Take(4).ToArray());
+            int bitmapHeight = ConvertEndianToInt(bytes.Skip(22).Take(4).ToArray()); // Can be negative : if so, image's rows are stored from top to bottom
+
+            this.numberOfColorPlanes = ConvertEndianToInt(bytes.Skip(26).Take(2).ToArray());
+            this.numberOfBitsPerPixel = ConvertEndianToInt(bytes.Skip(28).Take(2).ToArray());
+            this.compressionMethod = ConvertEndianToInt(bytes.Skip(30).Take(4).ToArray());
+
+            int imageSize = ConvertEndianToInt(bytes.Skip(34).Take(4).ToArray());
+
+            this.horizontalResolution = ConvertEndianToInt(bytes.Skip(38).Take(4).ToArray());
+            this.verticalResolution = ConvertEndianToInt(bytes.Skip(42).Take(4).ToArray());
+
+            this.numberOfColors = ConvertEndianToInt(bytes.Skip(46).Take(4).ToArray());
+            this.numberOfImportantColors = ConvertEndianToInt(bytes.Skip(50).Take(4).ToArray());
+
+            Console.WriteLine(this.dibHeaderSize + " " + bitmapWidth + " " + bitmapHeight + " " + this.numberOfColorPlanes + " " + this.numberOfBitsPerPixel + " " + this.compressionMethod + " " + imageSize + " " + this.horizontalResolution
+                + " " + this.verticalResolution + " " + this.numberOfColors + " " + this.numberOfImportantColors);
+
+            for (int i = 14; i < 14 + 40; i++)
             {
-                Console.WriteLine("The process failed: {0}", e.ToString());
+                Console.Write(bytes[i] + " ");
+            }
+            Console.WriteLine();
+            
+            this.image = new Pixel[Math.Abs(bitmapHeight), bitmapWidth];
+            byte[] imageData = bytes.Skip(this.fileDataOffset).Take(this.imageSize).ToArray();
+
+            for (int i = 0; i < Math.Abs(bitmapHeight); i++)
+            {
+                for (int j = 0; j < bitmapWidth; j++)
+                {
+                    byte[] pixelData = imageData.Skip(numberOfBytesPerPixel * (bitmapWidth * i + j) + padding * i).Take(numberOfBytesPerPixel).ToArray();
+                    this.image[(bitmapHeight >= 0 ? bitmapHeight - 1 - i: i), j] = numberOfBitsPerPixel == 24 ? new Pixel(pixelData[2], pixelData[1], pixelData[0]) : new Pixel(pixelData[2], pixelData[1], pixelData[0], pixelData[3]); // If bitmapHeight is negative, image's rows are stored from top to bottom
+                }
             }
 
         }
@@ -244,17 +241,24 @@ namespace ImageProcessing
 
             // Image data
 
-            for (int i = bitmapHeight-1; i >= 0; i--)
+            for (int i = bitmapHeight - 1; i >= 0; i--)
             {
                 for (int j = 0; j < bitmapWidth; j++)
                 {
-                    byte[] pixelData = { (byte)image[i, j].B, (byte)image[i, j].G, (byte)image[i, j].R };
+                    byte[] pixelData;
+                    if (numberOfBitsPerPixel == 24)
+                        pixelData = new byte[] { (byte)image[i, j].B, (byte)image[i, j].G, (byte)image[i, j].R };
+                    else if (numberOfBitsPerPixel == 32)
+                        pixelData = new byte[] { (byte)image[i, j].B, (byte)image[i, j].G, (byte)image[i, j].R, (byte)image[i, j].A };
+                    else
+                        throw new Exception("Number of bits per pixel for this image not supported");
+
                     fichier.AddRange(pixelData);
                 }
 
                 for (int k = 0; k < padding; k++)
                 {
-                    fichier.Add((byte) 0);
+                    fichier.Add((byte)0);
                 }
             }
 
@@ -276,25 +280,13 @@ namespace ImageProcessing
         {
             byte[] result = new byte[numberOfBytes];
 
-            for (int i = (int) numberOfBytes - 1; i >= 0; i--)
+            for (int i = (int)numberOfBytes - 1; i >= 0; i--)
             {
 
-                result[i] = (byte) (value / Math.Pow(256, i));
-                value = (int) (value % Math.Pow(256, i));
+                result[i] = (byte)(value / Math.Pow(256, i));
+                value = (int)(value % Math.Pow(256, i));
 
             }
-
-            //List<byte> tab = BitConverter.GetBytes(value).ToList();
-
-            //while (tab.Count < numberOfBytes)
-            //{
-            //    tab.Add(new byte());
-            //}
-
-            //while (tab.Count > numberOfBytes)
-            //{
-            //    tab.RemoveAt(tab.Count - 1);
-            //}
 
             return result;
         }
@@ -342,13 +334,13 @@ namespace ImageProcessing
         public MyImage Rotation(int degrees)
         {
             degrees = degrees % 360;
-            double angle = degrees * (Math.PI) / 180f;
+            double angle = degrees * (Math.PI) / 180f; // The rotation angle in radians
             MyImage result = this.Clone();
 
-            int height_corner_x = 0;
-            int height_corner_y = 0;
-            int width_corner_x = 0;
-            int width_corner_y = 0;
+            int height_corner_x;
+            int height_corner_y;
+            int width_corner_x;
+            int width_corner_y;
 
             // New height and width are calculated using coordinates of the corners of the image
             if (degrees <= 90 || (degrees >= 180 && degrees <= 270))
@@ -358,13 +350,14 @@ namespace ImageProcessing
                 height_corner_x = bitmapWidth / 2;
 
                 // Width corner is the bottom right / top left
-                width_corner_y = - bitmapHeight / 2;
+                width_corner_y = -bitmapHeight / 2;
                 width_corner_x = bitmapWidth / 2;
 
-            } else
+            }
+            else
             {
                 // Height corner is the bottom right / top left
-                height_corner_y = - bitmapHeight / 2;
+                height_corner_y = -bitmapHeight / 2;
                 height_corner_x = bitmapWidth / 2;
 
                 // Width corner is the top right / bottom left
@@ -373,8 +366,8 @@ namespace ImageProcessing
             }
 
             // Get angle of the corners before rotation, add angle of rotation and get sinus and cosinus
-            int newBitmapHeight = (int) Math.Abs(2 * Distance(height_corner_x, height_corner_y, 0, 0) * Math.Sin(Math.Atan2(height_corner_y, height_corner_x) + angle));
-            int newBitmapWidth = (int) Math.Abs(2 * Distance(width_corner_x, width_corner_y, 0, 0) * Math.Cos(Math.Atan2(width_corner_y, width_corner_x) + angle));
+            int newBitmapHeight = (int)Math.Abs(2 * Distance(height_corner_x, height_corner_y, 0, 0) * Math.Sin(Math.Atan2(height_corner_y, height_corner_x) + angle));
+            int newBitmapWidth = (int)Math.Abs(2 * Distance(width_corner_x, width_corner_y, 0, 0) * Math.Cos(Math.Atan2(width_corner_y, width_corner_x) + angle));
 
             result.image = new Pixel[newBitmapHeight, newBitmapWidth];
 
@@ -385,16 +378,13 @@ namespace ImageProcessing
             {
                 for (int newJ = 0; newJ < result.bitmapWidth; newJ++)
                 {
-                    //x = (int)(Math.Sin(angle) * i + Math.Cos(angle) * j);
-                    //y = (int)(Math.Sin(angle) * (this.bitmapWidth - j) + Math.Cos(angle) * i);
-
                     // Center is in (0, 0)
 
-                    double new_x = newJ - (newBitmapWidth / 2);
-                    double new_y = (newBitmapHeight / 2) - newI;
+                    double newX = newJ - (newBitmapWidth / 2);
+                    double newY = (newBitmapHeight / 2) - newI;
 
-                    oldX = (Distance(new_x, new_y, 0, 0) * Math.Cos(Math.Atan2(new_y - 0, new_x - 0) - angle));
-                    oldY = (Distance(new_x, new_y, 0, 0) * Math.Sin(Math.Atan2(new_y - 0, new_x - 0) - angle));
+                    oldX = (Distance(newX, newY, 0, 0) * Math.Cos(Math.Atan2(newY - 0, newX - 0) - angle));
+                    oldY = (Distance(newX, newY, 0, 0) * Math.Sin(Math.Atan2(newY - 0, newX - 0) - angle));
 
                     int oldI = (int)((bitmapHeight / 2) - oldY);
                     int oldJ = (int)(oldX + (bitmapWidth / 2));
@@ -407,11 +397,8 @@ namespace ImageProcessing
                     {
                         result.image[newI, newJ] = image[oldI, oldJ];
                     }
-
-                    //result.image[(int)(Math.Sin(angle) * (this.bitmapWidth - newJ) + Math.Cos(angle) * newI), (int)(Math.Sin(angle) * newI + Math.Cos(angle) * newJ)] = image[newI, newJ];
-
                 }
-                
+
             }
             return result;
         }
@@ -449,8 +436,8 @@ namespace ImageProcessing
                 default:
                     throw new Exception("cette direction n'existe pas");
             }
-            
-            return result; 
+
+            return result;
         }
 
         public MyImage Resized(float factor)
@@ -464,14 +451,14 @@ namespace ImageProcessing
             {
                 for (int j = 0; j < result.bitmapWidth; j++)
                 {
-                     result.image[i, j] = this.image[(int) (i * (double) this.bitmapHeight / result.bitmapHeight), (int) (j * (double) this.bitmapWidth / result.bitmapWidth)];
+                    result.image[i, j] = this.image[(int)(i * (double)this.bitmapHeight / result.bitmapHeight), (int)(j * (double)this.bitmapWidth / result.bitmapWidth)];
                 }
             }
 
             return result;
         }
 
-        public MyImage Convoluted (float[,] kernel)
+        public MyImage Convoluted(float[,] kernel)
         {
             MyImage result = this.Clone();
 
@@ -481,7 +468,7 @@ namespace ImageProcessing
 
             for (int i = 0; i < 3; i++)
             {
-                resultChannels[i] = Convolution(channels[i], kernel) ;
+                resultChannels[i] = Convolution(channels[i], kernel);
             }
 
             result.SetChannels(resultChannels);
@@ -489,7 +476,7 @@ namespace ImageProcessing
             return result;
         }
 
-        public int[][,] GetChannels ()
+        public int[][,] GetChannels()
         {
             int[][,] result = new int[3][,];
 
@@ -524,19 +511,19 @@ namespace ImageProcessing
             }
         }
 
-        public static int[,] Convolution (int[,] matrix, float[,] kernel)
+        public static int[,] Convolution(int[,] matrix, float[,] kernel)
         {
             int[,] result = new int[matrix.GetLength(0), matrix.GetLength(1)];
 
-            for (int i=0; i < matrix.GetLength(0); i++)
+            for (int i = 0; i < matrix.GetLength(0); i++)
             {
-                for (int j=0; j< matrix.GetLength(1); j++)
+                for (int j = 0; j < matrix.GetLength(1); j++)
                 {
-                    for (int k=0; k < kernel.GetLength(1); k++)
+                    for (int k = 0; k < kernel.GetLength(1); k++)
                     {
-                        for (int l=0; l< kernel.GetLength(0); l++)
+                        for (int l = 0; l < kernel.GetLength(0); l++)
                         {
-                            if ((i - (kernel.GetLength(0)/2) + l) >= 0 && (i - (kernel.GetLength(0) / 2) + l) < matrix.GetLength(0) && (j - (kernel.GetLength(1) / 2) + k) >= 0 && (j - (kernel.GetLength(1) / 2) + k) < matrix.GetLength(1))
+                            if ((i - (kernel.GetLength(0) / 2) + l) >= 0 && (i - (kernel.GetLength(0) / 2) + l) < matrix.GetLength(0) && (j - (kernel.GetLength(1) / 2) + k) >= 0 && (j - (kernel.GetLength(1) / 2) + k) < matrix.GetLength(1))
                             {
                                 result[i, j] += (int)(kernel[l, k] * matrix[i - (kernel.GetLength(0) / 2) + l, j - (kernel.GetLength(1) / 2) + k]);
                             }
@@ -547,9 +534,9 @@ namespace ImageProcessing
             return result;
         }
 
-        public MyImage Blur ()
+        public MyImage Blur()
         {
-            return Convoluted(new float[,] { { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f  },{ 1 / 9f, 1 / 9f, 1 / 9f  } });
+            return Convoluted(new float[,] { { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f } });
         }
 
         public MyImage BorderDetection()
@@ -585,7 +572,7 @@ namespace ImageProcessing
         {
             MyImage result = new MyImage(width, height);
 
-            int[,] colorValuesCounts = new int[3,256]; // The count of each value for each color
+            int[,] colorValuesCounts = new int[3, 256]; // The count of each value for each color
 
             int maxCount = 0; // The highest peak of the histogram
 
@@ -609,7 +596,7 @@ namespace ImageProcessing
                 }
             }
 
-            for (int j = margin; j < width-margin; j++)
+            for (int j = margin; j < width - margin; j++)
             {
                 // Iterate through the 3 color channels
                 for (int k = 0; k < 3; k++)
@@ -617,7 +604,7 @@ namespace ImageProcessing
                     int valueCount = colorValuesCounts[k, ((j - margin) * 255) / (width - 2 * margin)]; // The count of this value of this color
                     for (int i = height - margin - 1; i >= margin; i--)
                     {
-                        int rowValue = (height - margin - i) * maxCount / (height - 2 * margin) ; // The value corresponding to the y of the pixel on the histogram (relative to the scale of the y axis)
+                        int rowValue = (height - margin - i) * maxCount / (height - 2 * margin); // The value corresponding to the y of the pixel on the histogram (relative to the scale of the y axis)
 
                         if (rowValue > valueCount)
                         {
@@ -639,7 +626,7 @@ namespace ImageProcessing
                                     result.image[i, j].B = 255;
                                     break;
                             }
-                                
+
                         }
                     }
                 }
@@ -650,14 +637,14 @@ namespace ImageProcessing
         public static MyImage Mandelbrot(int width, int height)
         {
             MyImage fract = new MyImage(width, height);
-            Complex coordonnees = new Complex(0,0);
+            Complex coordonnees = new Complex(0, 0);
 
             double rectWidth = 4f;
             double rectHeight = 4f;
-            
-            for (int i=0 ; i < height; i++)
+
+            for (int i = 0; i < height; i++)
             {
-                for (int j=0 ; j < width; j++)
+                for (int j = 0; j < width; j++)
                 {
                     Complex z = new Complex(0, 0);
                     double x = (j * rectWidth / width) - (rectWidth / 2);
@@ -678,7 +665,8 @@ namespace ImageProcessing
             }
             return fract;
         }
-        public MyImage Hide (MyImage imagecachante)
+
+        public MyImage Hide(MyImage imagecachante)
         {
             MyImage imagecachee = this;
             MyImage nouvelleimage = imagecachante.Clone();
@@ -694,7 +682,7 @@ namespace ImageProcessing
             }
             return nouvelleimage;
         }
-        
+
 
         /// <summary>
         /// 
@@ -708,7 +696,7 @@ namespace ImageProcessing
             {
                 for (int j = 0; j < imagecachante.image.GetLength(1); j++)
                 {
-                    imagecachante.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4)+ "0000", 2);
+                    imagecachante.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
                     imagecachante.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
                     imagecachante.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
 
