@@ -677,10 +677,6 @@ namespace ImageProcessing
 
             Pixel[,] result = new Pixel[size / moduleSize, size / moduleSize];
 
-            Console.WriteLine();
-            Console.WriteLine("Size " + size);
-            Console.WriteLine(topLeft.Item1 + " " + topLeft.Item2);
-
             int i2 = 0;
             for (int i = topLeft.Item1 + moduleSize/2; i <= bottomRight.Item1; i += moduleSize)
             {

@@ -11,7 +11,12 @@ namespace ImageProcessing
     {
 
         // File header data
+
         string fileType;
+
+        /// <summary>
+        /// The size of the file in bytes
+        /// </summary>
         int fileSize
         {
             get
@@ -20,10 +25,14 @@ namespace ImageProcessing
             }
         }
 
+        /// <summary>
+        /// The offset in bytes where the image's data starts
+        /// </summary>
         int fileDataOffset;
 
 
         // DIB Header data
+
         int dibHeaderSize;
         int bitmapWidth
         {
@@ -65,7 +74,9 @@ namespace ImageProcessing
         // Image data
         public Pixel[,] image;
 
-        // Number of bytes added to each row of pixel
+        /// <summary>
+        /// Number of bytes added to each row of pixel in order to have a multiple of 32 bits
+        /// </summary>
         int padding
         {
             get
@@ -76,7 +87,7 @@ namespace ImageProcessing
 
 
         /// <summary>
-        /// Reads .bmp file and creates a MyImage object from it
+        /// Reads a .bmp file and creates a MyImage object from it
         /// </summary>
         public MyImage(string filepath)
         {
@@ -84,7 +95,8 @@ namespace ImageProcessing
 
             bytes = File.ReadAllBytes(filepath);
 
-            Console.WriteLine("\nFile header");
+            Console.WriteLine("\nReading image: " + filepath);
+            Console.WriteLine("File header");
 
             this.fileType = ((char)bytes[0]).ToString() + ((char)bytes[1]).ToString();
 
@@ -134,17 +146,19 @@ namespace ImageProcessing
             {
                 for (int j = 0; j < bitmapWidth; j++)
                 {
+                    // Put the pixels in the matrix
+                    // By default, rows are ordered from bottom to top, but if bitmapHeight is negative, image's rows are stored from top to bottom
+                    // If numberOfBitsPerPixel is 24, a pixel has only BGR values. If numberOfBitsPerPixel is 32, a pixel has BGRA values
                     byte[] pixelData = imageData.Skip(numberOfBytesPerPixel * (bitmapWidth * i + j) + padding * i).Take(numberOfBytesPerPixel).ToArray();
-                    this.image[(bitmapHeight >= 0 ? bitmapHeight - 1 - i: i), j] = numberOfBitsPerPixel == 24 ? new Pixel(pixelData[2], pixelData[1], pixelData[0]) : new Pixel(pixelData[2], pixelData[1], pixelData[0], pixelData[3]); // If bitmapHeight is negative, image's rows are stored from top to bottom
+                    this.image[(bitmapHeight >= 0 ? bitmapHeight - 1 - i: i), j] = numberOfBitsPerPixel == 24 ? new Pixel(pixelData[2], pixelData[1], pixelData[0]) : new Pixel(pixelData[2], pixelData[1], pixelData[0], pixelData[3]);
                 }
             }
-
         }
 
         /// <summary>
-        /// Creates an image from an existing image
+        /// Creates an image from an existing image by copying it
         /// </summary>
-        /// <param name="image"></param>
+        /// <param name="image">The image to copy</param>
         public MyImage(MyImage img)
         {
             this.fileType = img.fileType;
@@ -188,10 +202,13 @@ namespace ImageProcessing
             this.verticalResolution = verticalResolution;
             this.numberOfColors = numberOfColors;
             this.numberOfImportantColors = numberOfImportantColors;
-
         }
 
-        public void FromImageToFile(string file)
+        /// <summary>
+        /// Exports the image to a file
+        /// </summary>
+        /// <param name="filepath">The filepath of the exported image</param>
+        public void FromImageToFile(string filepath)
         {
             List<byte> fichier = new List<byte>();
             // File header
@@ -258,14 +275,19 @@ namespace ImageProcessing
 
                 for (int k = 0; k < padding; k++)
                 {
-                    fichier.Add((byte)0);
+                    fichier.Add(0);
                 }
             }
 
 
-            File.WriteAllBytes(file, fichier.ToArray());
+            File.WriteAllBytes(filepath, fichier.ToArray());
         }
 
+        /// <summary>
+        /// Converts a LittleEndian byte array to a signed integer
+        /// </summary>
+        /// <param name="tab">The byte array</param>
+        /// <returns>The corresponding integer</returns>
         public static int ConvertEndianToInt(byte[] tab)
         {
             int result = 0;
@@ -276,13 +298,18 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Converts a signed integer to a LittleEndian byte array of a certain number of bytes
+        /// </summary>
+        /// <param name="value">The integer to convert</param>
+        /// <param name="numberOfBytes">The number of bytes of the final byte array</param>
+        /// <returns>The converted byte array</returns>
         public static byte[] ConvertIntToEndian(int value, uint numberOfBytes)
         {
             byte[] result = new byte[numberOfBytes];
 
             for (int i = (int)numberOfBytes - 1; i >= 0; i--)
             {
-
                 result[i] = (byte)(value / Math.Pow(256, i));
                 value = (int)(value % Math.Pow(256, i));
 
@@ -291,11 +318,19 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Makes a copy of this MyImage and returns it
+        /// </summary>
+        /// <returns>The clone of the MyImage</returns>
         public MyImage Clone()
         {
             return new MyImage(this);
         }
 
+        /// <summary>
+        /// Gets a copy of the image in shades of grey
+        /// </summary>
+        /// <returns>The modified image</returns>
         public MyImage ToShadesOfGrey()
         {
             MyImage result = this.Clone();
@@ -311,6 +346,10 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Gets a copy of the image in only black and white pixels
+        /// </summary>
+        /// <returns>The modified image</returns>
         public MyImage ToBlackAndWhite()
         {
             MyImage result = this.Clone();
@@ -326,19 +365,35 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Calculates the distance between 2 points x and y
+        /// </summary>
+        /// <param name="x1">Abscissa of point x</param>
+        /// <param name="y1">Ordinate of point x</param>
+        /// <param name="x2">Abscissa of point y</param>
+        /// <param name="y2">Ordinate of point y</param>
+        /// <returns>The distance between the points</returns>
         public static double Distance(double x1, double y1, double x2, double y2)
         {
             return Math.Sqrt(Math.Pow(x1 - x2, 2) + Math.Pow(y1 - y2, 2));
         }
 
-        public MyImage Rotation(int degrees)
+        /// <summary>
+        /// Rotates an image from a certain angle. The resulting image will have white corners if needed.
+        /// </summary>
+        /// <param name="degrees">The angle in degrees of the rotation</param>
+        /// <returns>The modified image</returns>
+        public MyImage Rotation(double degrees)
         {
             degrees = degrees % 360;
             double angle = degrees * (Math.PI) / 180f; // The rotation angle in radians
             MyImage result = this.Clone();
 
+            // Coordinates of the corner that will be used to calculate the height of the new image
             int height_corner_x;
             int height_corner_y;
+
+            // Coordinates of the corner that will be used to calculate the width of the new image
             int width_corner_x;
             int width_corner_y;
 
@@ -371,27 +426,26 @@ namespace ImageProcessing
 
             result.image = new Pixel[newBitmapHeight, newBitmapWidth];
 
-            double oldX;
-            double oldY;
 
+            // Cycle through the pixels of the result image and find the corresponding pixel in the old image
             for (int newI = 0; newI < result.bitmapHeight; newI++)
             {
                 for (int newJ = 0; newJ < result.bitmapWidth; newJ++)
                 {
-                    // Center is in (0, 0)
+                    // Center of the image is at x,y = (0, 0)
 
                     double newX = newJ - (newBitmapWidth / 2);
                     double newY = (newBitmapHeight / 2) - newI;
 
-                    oldX = (Distance(newX, newY, 0, 0) * Math.Cos(Math.Atan2(newY - 0, newX - 0) - angle));
-                    oldY = (Distance(newX, newY, 0, 0) * Math.Sin(Math.Atan2(newY - 0, newX - 0) - angle));
+                    double oldX = (Distance(newX, newY, 0, 0) * Math.Cos(Math.Atan2(newY - 0, newX - 0) - angle));
+                    double oldY = (Distance(newX, newY, 0, 0) * Math.Sin(Math.Atan2(newY - 0, newX - 0) - angle));
 
                     int oldI = (int)((bitmapHeight / 2) - oldY);
                     int oldJ = (int)(oldX + (bitmapWidth / 2));
 
                     if (oldJ < 0 || oldI < 0 || oldJ >= bitmapWidth || oldI >= bitmapHeight)
                     {
-                        result.image[newI, newJ] = new Pixel(255, 255, 255);
+                        result.image[newI, newJ] = new Pixel(255, 255, 255); // White corners
                     }
                     else
                     {
@@ -405,41 +459,29 @@ namespace ImageProcessing
 
 
         /// <summary>
-        /// 
+        /// Inverts the image horizontally
         /// </summary>
-        /// <param name="direction">0: De droite à gauche. 1: De haut en bas.</param>
-        /// <returns></returns>
-        public MyImage EffetMiroir(int direction)
+        /// <returns>The modified image</returns>
+        public MyImage EffetMiroir()
         {
             MyImage result = this.Clone();
 
-            switch (direction)
+            for (int i = 0; i < result.image.GetLength(0); i++)
             {
-                case 0:
-                    for (int i = 0; i < result.image.GetLength(0); i++)
-                    {
-                        for (int j = 0; j < result.image.GetLength(1); j++)
-                        {
-                            result.image[i, j] = image[i, result.image.GetLength(1) - j - 1];
-                        }
-                    }
-                    break;
-                case 1:
-                    for (int i = 0; i < result.image.GetLength(0); i++)
-                    {
-                        for (int j = 0; j < result.image.GetLength(1); j++)
-                        {
-                            result.image[i, j] = image[result.image.GetLength(0) - i - 1, j];
-                        }
-                    }
-                    break;
-                default:
-                    throw new Exception("cette direction n'existe pas");
+                for (int j = 0; j < result.image.GetLength(1); j++)
+                {
+                    result.image[i, j] = image[i, result.image.GetLength(1) - j - 1];
+                }
             }
 
             return result;
         }
 
+        /// <summary>
+        /// Resizes the image
+        /// </summary>
+        /// <param name="factor">The multiplication factor of the resulting image</param>
+        /// <returns>The modified image</returns>
         public MyImage Resized(float factor)
         {
             MyImage result = this.Clone();
@@ -458,24 +500,35 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Makes the convolution of the image with a given kernel
+        /// </summary>
+        /// <param name="kernel"></param>
+        /// <returns>The convoluted image</returns>
         public MyImage Convoluted(float[,] kernel)
         {
             MyImage result = this.Clone();
 
             int[][,] resultChannels = new int[3][,];
 
-            int[][,] channels = GetChannels();
+            int[][,] channels = GetChannels(); // Separate the color channels
 
+            // Make the convolution of each channel
             for (int i = 0; i < 3; i++)
             {
                 resultChannels[i] = Convolution(channels[i], kernel);
             }
 
+            // Change the channels of the image to the new channels
             result.SetChannels(resultChannels);
 
             return result;
         }
 
+        /// <summary>
+        /// Separates the color channels of the image into 3 matrices
+        /// </summary>
+        /// <returns></returns>
         public int[][,] GetChannels()
         {
             int[][,] result = new int[3][,];
@@ -498,6 +551,10 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Put the colors of the image from 3 matrices containing the color channels of the image
+        /// </summary>
+        /// <param name="channels"></param>
         public void SetChannels(int[][,] channels)
         {
             for (int i = 0; i < this.bitmapHeight; i++)
@@ -511,6 +568,12 @@ namespace ImageProcessing
             }
         }
 
+        /// <summary>
+        /// Makes the convolution of a matrix
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <param name="kernel"></param>
+        /// <returns>The convoluted matrix</returns>
         public static int[,] Convolution(int[,] matrix, float[,] kernel)
         {
             int[,] result = new int[matrix.GetLength(0), matrix.GetLength(1)];
@@ -534,48 +597,66 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Uses the convolution to blur the image
+        /// </summary>
+        /// <returns></returns>
         public MyImage Blur()
         {
             return Convoluted(new float[,] { { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f } });
         }
 
+        /// <summary>
+        /// Uses the convolution to detect the borders of the image
+        /// </summary>
+        /// <returns></returns>
         public MyImage BorderDetection()
         {
             return Convoluted(new float[,] { { 0, 1, 0 }, { 1, -4, 1 }, { 0, 1, 0 } });
         }
 
-
+        /// <summary>
+        /// Uses the convolution to reinforce the edges of the image
+        /// </summary>
+        /// <returns></returns>
         public MyImage EdgeReinforcement()
         {
             return Convoluted(new float[,] { { 0, 0, 0 }, { -1, 1, 0 }, { 0, 0, 0 } });
         }
 
-        public MyImage RandomKernel()
-        {
-            return Convoluted(new float[,] { { 1, 2, 3 }, { -8, -10, -12 }, { 7, 8, 9 } });
-            //return Convoluted(new float[,] { { 68, -68, 68 }, { -68, 0, -68 }, { 68, -68, 68 } });
-        }
-
+        /// <summary>
+        /// Uses the convolution to give an horizontal motion blur effect to the image
+        /// </summary>
+        /// <returns></returns>
         public MyImage MotionBlur()
         {
-            //return Convoluted(new float[,] { { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, { 1/5f, 1/5f, 1/5f, 1/5f, 1/5f }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 } });
             return Convoluted(new float[,] { { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 } });
 
         }
 
-        public MyImage Repoussage()
+        /// <summary>
+        /// Uses the convolution to emboss the image
+        /// </summary>
+        /// <returns></returns>
+        public MyImage Emboss()
         {
             return Convoluted(new float[,] { { -2, -1, 0 }, { -1, 1, 1 }, { 0, 1, 2 } });
         }
 
+        /// <summary>
+        /// Makes an histogram of the image
+        /// </summary>
+        /// <param name="width">The width of the histogram in pixels</param>
+        /// <param name="height">The height of the histogram in pixels</param>
+        /// <param name="margin">The size in pixels of the black margin</param>
+        /// <returns>The histogram as a MyImage</returns>
         public MyImage Histogram(int width, int height, int margin = 50)
         {
             MyImage result = new MyImage(width, height);
 
             int[,] colorValuesCounts = new int[3, 256]; // The count of each value for each color
 
-            int maxCount = 0; // The highest peak of the histogram
-
+            // Count the number of pixels that have each color value in the image
             for (int i = 0; i < bitmapHeight; i++)
             {
                 for (int j = 0; j < bitmapWidth; j++)
@@ -586,6 +667,7 @@ namespace ImageProcessing
                 }
             }
 
+            int maxCount = 0; // The highest peak of the histogram
             // Find maximum of the valueCounts
             for (int i = 0; i < 3; i++)
             {
@@ -601,12 +683,14 @@ namespace ImageProcessing
                 // Iterate through the 3 color channels
                 for (int k = 0; k < 3; k++)
                 {
-                    int valueCount = colorValuesCounts[k, ((j - margin) * 255) / (width - 2 * margin)]; // The count of this value of this color
+                    int valueCount = colorValuesCounts[k, ((j - margin) * 255) / (width - 2 * margin)]; // The count of this value for this color
+
+                    // Create the peak corresponding to this value for each color
                     for (int i = height - margin - 1; i >= margin; i--)
                     {
                         int rowValue = (height - margin - i) * maxCount / (height - 2 * margin); // The value corresponding to the y of the pixel on the histogram (relative to the scale of the y axis)
 
-                        if (rowValue > valueCount)
+                        if (rowValue > valueCount) // The peak is high enough
                         {
                             break;
                         }
@@ -634,30 +718,38 @@ namespace ImageProcessing
             return result;
         }
 
-        public static MyImage Mandelbrot(int width, int height)
+        /// <summary>
+        /// Create a Mandelbrot fractal
+        /// </summary>
+        /// <param name="width">The width of the image in pixels</param>
+        /// <param name="iterations">Number of iterations before considering that the point is in the set</param>
+        /// <param name="centerX">The abscissa of the center of the view box</param>
+        /// <param name="centerY">The ordinate of the center of the view box</param>
+        /// <param name="rectWidth">The width of the view box</param>
+        /// <param name="rectHeight">The height of the view box</param>
+        /// <returns></returns>
+        public static MyImage Mandelbrot(int width, int iterations = 100, double centerX = 0, double centerY = 0, double rectWidth = 3f, double rectHeight = 2f)
         {
+            int height = (int) (rectHeight * width/rectWidth);
             MyImage fract = new MyImage(width, height);
-            Complex coordonnees = new Complex(0, 0);
-
-            double rectWidth = 4f;
-            double rectHeight = 4f;
 
             for (int i = 0; i < height; i++)
             {
                 for (int j = 0; j < width; j++)
                 {
-                    Complex z = new Complex(0, 0);
-                    double x = (j * rectWidth / width) - (rectWidth / 2);
-                    double y = (rectHeight / 2) - (i * rectHeight / height);
+                    
+                    double x = (j * rectWidth / width) - (rectWidth / 2) + centerX;
+                    double y = (rectHeight / 2) - (i * rectHeight / height) + centerY;
 
-                    coordonnees = new Complex(x, y);
-                    for (int k = 0; k < 100; k++)
+                    Complex z = new Complex(0, 0);
+                    Complex coordinates = new Complex(x, y);
+                    for (int k = 0; k < iterations; k++)
                     {
-                        z = (z * z) + coordonnees;
+                        z = (z * z) + coordinates;
                         double moduleZ = Math.Sqrt(z.Real * z.Real + z.Imaginary * z.Imaginary);
                         if (moduleZ > 2)
                         {
-                            fract.image[i, j] = new Pixel(255, 255, 255);
+                            fract.image[i, j] = new Pixel(255 * (iterations - k)/iterations, 255 * (iterations - k) / iterations, 255);
                             break;
                         }
                     }
@@ -666,21 +758,29 @@ namespace ImageProcessing
             return fract;
         }
 
-        public MyImage Hide(MyImage imagecachante)
+        /// <summary>
+        /// Hide the image into another
+        /// </summary>
+        /// <param name="containerImage">The image that will store the hidden image</param>
+        /// <returns>The final image</returns>
+        public MyImage HideIn(MyImage containerImage)
         {
-            MyImage imagecachee = this;
-            MyImage nouvelleimage = imagecachante.Clone();
-            //il faut vérif que les images aient la même hauteur ? 
-            for (int i = 0; i < imagecachante.image.GetLength(0); i++)
+            MyImage hiddenImage = this;
+            MyImage result = containerImage.Clone();
+
+            if (hiddenImage.bitmapWidth > containerImage.bitmapWidth || hiddenImage.bitmapHeight > containerImage.bitmapHeight)
+                throw new Exception("The hidden image is too big to be stored in the hiding image");
+            
+            for (int i = 0; i < hiddenImage.image.GetLength(0); i++)
             {
-                for (int j = 0; j < imagecachante.image.GetLength(1); j++)
+                for (int j = 0; j < hiddenImage.image.GetLength(1); j++)
                 {
-                    nouvelleimage.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)imagecachante.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)imagecachee.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4), 2);
-                    nouvelleimage.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)imagecachante.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)imagecachee.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4), 2);
-                    nouvelleimage.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)imagecachante.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)imagecachee.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                    result.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                    result.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                    result.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4), 2);
                 }
             }
-            return nouvelleimage;
+            return result;
         }
 
 
@@ -706,11 +806,6 @@ namespace ImageProcessing
                 }
             }
             return (imagecachee, imagecachante);
-        }
-
-        public static MyImage HideIn(MyImage containerImage)
-        {
-            return null;
         }
     }
 }
