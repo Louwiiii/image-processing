@@ -650,7 +650,7 @@ namespace ImageProcessing
         /// <param name="height">The height of the histogram in pixels</param>
         /// <param name="margin">The size in pixels of the black margin</param>
         /// <returns>The histogram as a MyImage</returns>
-        public MyImage Histogram(int width, int height, int margin = 50)
+        public MyImage Histogram(int width=500, int height=250, int margin = 50)
         {
             MyImage result = new MyImage(width, height);
 
