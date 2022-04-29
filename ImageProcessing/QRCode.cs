@@ -461,7 +461,7 @@ namespace ImageProcessing
             }
         }
 
-        public static string Read(MyImage image)
+        public string Read(this MyImage image)
         {
             Pixel[,] matrix = ExtractQRFromImage(image);
 
