@@ -23,7 +23,6 @@ namespace ImageProcessing
             test.FromImageToFile("Images/test bugged.bmp");
 
             MyImage read_qr = new MyImage("Images/coco qrcode.bmp");
-            Console.WriteLine(QRCode.Read(read_qr));
 
             Console.ReadKey();
         }

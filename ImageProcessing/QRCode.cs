@@ -78,6 +78,11 @@ namespace ImageProcessing
             FillQRCode(this.image, version: version, dataBits: encodedString, correctionLevel: correctionLevel);
         }
 
+        public QRCode (MyImage image) : base(0, 0)
+        {
+            this.image = ExtractQRFromImage(image);
+        }
+
         static string EncodeContent(string content)
         {
             string result = "";
@@ -111,39 +116,8 @@ namespace ImageProcessing
             }
             else
             {
+                return " $%*+-./:".IndexOf(character) + 36;
                 // Char is in the " $%*+-./:" string or can't be encoded
-                switch (character)
-                {
-                    case ' ':
-                        return 36;
-
-                    case '$':
-                        return 37;
-
-                    case '%':
-                        return 38;
-
-                    case '*':
-                        return 39;
-
-                    case '+':
-                        return 40;
-
-                    case '-':
-                        return 41;
-
-                    case '.':
-                        return 42;
-
-                    case '/':
-                        return 43;
-
-                    case ':':
-                        return 44;
-
-                    default:
-                        throw new Exception("Character can't be encoded");
-                }
             }
         }
 
@@ -463,7 +437,7 @@ namespace ImageProcessing
 
         public string Read()
         {
-            Pixel[,] matrix = ExtractQRFromImage(this);
+            Pixel[,] matrix = this.image;
 
             this.image = matrix;
 
@@ -547,8 +521,6 @@ namespace ImageProcessing
 
             // Version information area (Version 7 and above)
 
-            image.FromImageToFile("Images/extracted_rm_qr.bmp");
-
 
 
             int line = matrix.GetLength(0) - 1;
@@ -607,8 +579,6 @@ namespace ImageProcessing
                     column = 5;
             }
 
-            
-
             return DecodeData(databits, version);
         }
 
@@ -624,7 +594,7 @@ namespace ImageProcessing
             int threshold = 10; // Threshold for pixel to be considered as black (under 10) or white (above 245)
 
             int size = matrix.GetLength(0); // The size in pixels of the QR Code
-            (int, int) topLeft; // Line and column of the top left pixel of the QR Code
+            (int, int) topLeft = (0, 0); // Line and column of the top left pixel of the QR Code
             (int, int) bottomRight = (matrix.GetLength(0) - 1, matrix.GetLength(1) - 1);
 
             // Find the Finder patterns
@@ -634,27 +604,87 @@ namespace ImageProcessing
                 {
                     if (matrix[i, j].Max < threshold) // Found a black pixel
                     {
-                        int j2 = j;
+                        
                         int length = 0;
 
-                        // Get the length of the black line
-                        while (matrix[i, j2].Max < threshold)
                         {
-                            j2++;
-                            length++;
+                            int j2 = j;
+                            // Get the length of the black line
+                            while (matrix[i, j2].Max < threshold)
+                            {
+                                j2++;
+                                length++;
+                            }
                         }
+                        
 
                         // We suppose black line is the Finder pattern, then module size is black line length / 7
                         moduleSize = length / 7;
 
+                        bool validFinderPattern = true;
 
-                        // We check if it's really a finder pattern
-                        // ToDo
+                        if (moduleSize == 0)
+                            validFinderPattern = false;
 
-                        // If so, top left pixel is (i, j)
-                        topLeft = (i, j);
+                        if (validFinderPattern)
+                        {
+                            // We check if it's really a finder pattern
+                            for (int i2 = i; i2 < 7; i2 += moduleSize)
+                            {
+                                if (matrix[i2, j].Max > threshold) // The pixel is not black
+                                {
+                                    validFinderPattern = false;
+                                    break;
+                                }
+                            }
 
-                        goto Extract;
+                            for (int i2 = i + moduleSize; i2 < 5; i2 += moduleSize)
+                            {
+                                if (matrix[i2, j+moduleSize].Min < 255 - threshold) // The pixel is not white
+                                {
+                                    validFinderPattern = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (validFinderPattern)
+                        {
+                            // If so, top left pixel is (i, j)
+                            topLeft = (i, j);
+
+                            // Get the size of the QR Code
+                            // Find the next horizontal black line of 7 pixels
+                            int blackPixelsLineLength = 0;
+                            for (int j2 = topLeft.Item2 + 7*moduleSize; j2 < matrix.GetLength(1); j2 += moduleSize)
+                            {
+                                if (matrix[topLeft.Item1, j2].Max < threshold) // Found black pixel
+                                {
+                                    blackPixelsLineLength++;
+                                }
+                                else if (matrix[topLeft.Item1, j2].Min > 255 - threshold) // Found white pixel
+                                {
+                                    blackPixelsLineLength = 0;
+                                }
+                                else
+                                {
+                                    // Pixel is neither white nor black
+                                    validFinderPattern = false;
+                                    break;
+                                }
+                                
+                                if (blackPixelsLineLength == 7) // We probably found the top right finder pattern
+                                {
+                                    size = j2 - topLeft.Item2 + moduleSize;
+                                    bottomRight = (topLeft.Item1 + size - 1, topLeft.Item2 + size - 1);
+                                    break;
+
+                                }
+                            }
+                        }
+
+                        if (validFinderPattern)
+                            goto Extract;
                     }
                 }
             }
@@ -664,38 +694,28 @@ namespace ImageProcessing
 
         Extract:
 
-            // Get the size of the QR Code
-            for (int j = matrix.GetLength(1) - 1; j >= topLeft.Item2; j--)
+            Pixel[,] result = new Pixel[(int) Math.Round((double) size / moduleSize), (int)Math.Round((double) size / moduleSize)];
             {
-                if (matrix[topLeft.Item1, j].Max < threshold) // Found black pixel on the right
+                int i2 = 0;
+                for (int i = topLeft.Item1 + moduleSize / 2; i <= bottomRight.Item1; i += moduleSize)
                 {
-                    size = j - topLeft.Item2 + 1;
-                    bottomRight = (topLeft.Item1 + size - 1, topLeft.Item2 + size - 1);
-                    break;
-                }
-            }
-
-            Pixel[,] result = new Pixel[size / moduleSize, size / moduleSize];
-
-            int i2 = 0;
-            for (int i = topLeft.Item1 + moduleSize/2; i <= bottomRight.Item1; i += moduleSize)
-            {
-                int j2 = 0;
-                for (int j = topLeft.Item2 + moduleSize / 2; j <= bottomRight.Item2; j += moduleSize)
-                {
-
-                    if (matrix[i, j].Max < 127)
+                    int j2 = 0;
+                    for (int j = topLeft.Item2 + moduleSize / 2; j <= bottomRight.Item2; j += moduleSize)
                     {
-                        result[i2, j2] = new Pixel(0, 0, 0);
-                    }
-                    else
-                    {
-                        result[i2, j2] = new Pixel(255, 255, 255);
-                    }
 
-                    j2++;
+                        if (matrix[i, j].Max < 127)
+                        {
+                            result[i2, j2] = new Pixel(0, 0, 0);
+                        }
+                        else
+                        {
+                            result[i2, j2] = new Pixel(255, 255, 255);
+                        }
+
+                        j2++;
+                    }
+                    i2++;
                 }
-                i2++;
             }
 
             return result;
