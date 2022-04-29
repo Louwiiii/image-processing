@@ -461,11 +461,11 @@ namespace ImageProcessing
             }
         }
 
-        public string Read(this MyImage image)
+        public string Read()
         {
-            Pixel[,] matrix = ExtractQRFromImage(image);
+            Pixel[,] matrix = ExtractQRFromImage(this);
 
-            image.image = matrix;
+            this.image = matrix;
 
             int version = (matrix.GetLength(0) - 21)/4 + 1;
             Console.WriteLine("\nVersion: " + version);
