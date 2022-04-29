@@ -644,6 +644,15 @@ namespace ImageProcessing
         }
 
         /// <summary>
+        /// Uses the convolution to sharpen the image
+        /// </summary>
+        /// <returns></returns>
+        public MyImage Sharpen()
+        {
+            return Convoluted(new float[,] { { 0, -1, 0 }, { -1, 5, -1 }, { 0, -1, 0 } });
+        }
+
+        /// <summary>
         /// Makes an histogram of the image
         /// </summary>
         /// <param name="width">The width of the histogram in pixels</param>
