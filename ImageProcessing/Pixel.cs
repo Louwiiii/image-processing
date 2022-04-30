@@ -78,12 +78,27 @@ namespace ImageProcessing
             }
         }
 
-        public Pixel(int r, int g, int b, int a = 0)
+        public double Average
+        {
+            get { return (R+G+B)/3f; }
+        }
+
+        public Pixel(int r, int g, int b, int a = 255)
         {
             this.r = r;
             this.g = g;
             this.b = b;
             this.a = a;
+        }
+
+        public Pixel(string hexColor)
+        {
+            hexColor = hexColor.Replace("#", "");
+
+            this.r = Convert.ToInt32(hexColor[0].ToString()+hexColor[1], 16);
+            this.g = Convert.ToInt32(hexColor[2].ToString()+hexColor[3], 16);
+            this.b = Convert.ToInt32(hexColor[4].ToString()+hexColor[5], 16);
+            this.a = 255;
         }
 
         public override string ToString()

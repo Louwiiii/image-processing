@@ -210,6 +210,9 @@ namespace ImageProcessing
         /// <param name="filepath">The filepath of the exported image</param>
         public void FromImageToFile(string filepath)
         {
+            //this.dibHeaderSize = 40; // Other dib header sizes are not supported
+            this.compressionMethod = 0; // Other methods are not supported
+
             List<byte> fichier = new List<byte>();
             // File header
 
@@ -256,7 +259,8 @@ namespace ImageProcessing
             //this.numberOfImportantColors 
             fichier.AddRange(ConvertIntToEndian(this.numberOfImportantColors, 4));
 
-            // Image data
+            //Add padding until the fileDataOffset
+            fichier.AddRange(Enumerable.Repeat((byte) 0, fileDataOffset - fichier.Count));
 
             for (int i = bitmapHeight - 1; i >= 0; i--)
             {
@@ -359,6 +363,24 @@ namespace ImageProcessing
                 for (int j = 0; j < result.image.GetLength(1); j++)
                 {
                     result.image[i, j] = result.image[i, j].ToBlackOrWhite();
+                }
+            }
+
+            return result;
+        }
+
+        public MyImage ChangedTint (string hexColor)
+        {
+            Pixel color = new Pixel(hexColor);
+
+            MyImage result = this.Clone();
+
+            for (int i = 0; i < result.image.GetLength(0); i++)
+            {
+                for (int j = 0; j < result.image.GetLength(1); j++)
+                {
+                    double average = result.image[i, j].Average;
+                    result.image[i, j] = new Pixel((int) (average * color.R / 255), (int)(average * color.G / 255), (int)(average * color.B / 255));
                 }
             }
 
@@ -780,13 +802,22 @@ namespace ImageProcessing
             if (hiddenImage.bitmapWidth > containerImage.bitmapWidth || hiddenImage.bitmapHeight > containerImage.bitmapHeight)
                 throw new Exception("The hidden image is too big to be stored in the hiding image");
             
-            for (int i = 0; i < hiddenImage.image.GetLength(0); i++)
+            for (int i = 0; i < containerImage.image.GetLength(0); i++)
             {
-                for (int j = 0; j < hiddenImage.image.GetLength(1); j++)
+                for (int j = 0; j < containerImage.image.GetLength(1); j++)
                 {
-                    result.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4), 2);
-                    result.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4), 2);
-                    result.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                    if (i < hiddenImage.image.GetLength(0) && j < hiddenImage.image.GetLength(1))
+                    {
+                        result.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                        result.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                        result.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4), 2);
+                    }
+                    else
+                    {
+                        result.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
+                        result.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
+                        result.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
+                    }
                 }
             }
             return result;
@@ -815,6 +846,82 @@ namespace ImageProcessing
                 }
             }
             return (imagecachee, imagecachante);
+        }
+
+        public static double ColorDistance (Pixel col1, Pixel col2)
+        {
+            return Math.Sqrt(Math.Pow(col2.R - col1.R, 2) + Math.Pow(col2.G - col1.G, 2) + Math.Pow(col2.B - col1.B, 2));
+        }
+
+        public MyImage RemoveBackground (string colorHex="#000000", double threshold = 5)
+        {
+            MyImage result = this.Clone();
+
+            Pixel[,] matrix = result.BorderDetection().image; // Matrix used for border detection
+
+            for (int i = 0; i < matrix.GetLength(0); i++) 
+            {
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    if (matrix[i, j].Max > threshold)
+                        matrix[i, j] = new Pixel(255, 255, 255);
+                    else
+                        matrix[i, j] = new Pixel(0, 0, 0);
+                }
+            }
+
+            // Link the white pixels that are very close
+            MyImage temp = result.Clone();
+            temp.image = matrix;
+            matrix = temp.Blur().image;
+
+
+            // We must find the best point on the outside of the image to start (the point in the middle of the biggest area of black pixels)
+
+            // We average the color of the background
+            Pixel bgColor = matrix[0, 0];
+
+            (int, int) bestIJ = (0, 0);
+
+            matrix[bestIJ.Item1, bestIJ.Item2] = new Pixel(125, 0, 0);
+
+            List<(int, int)> spreadingPoints = new List<(int, int)> { bestIJ, (matrix.GetLength(0) - 1, 0), (matrix.GetLength(0) - 1, matrix.GetLength(1) - 1), (0, matrix.GetLength(1) - 1) };
+
+            // We spread the red background
+            while (spreadingPoints.Count > 0)
+            {
+                for (int k = spreadingPoints.Count - 1; k >= 0; k--)
+                {
+                    (int i, int j) = spreadingPoints[k];
+
+                    foreach ((int i2, int j2) in new (int, int)[] { (i-1, j), (i+1, j), (i, j-1), (i, j+1)})
+                    {
+                        if (i2 >= 0 && j2 >= 0 && i2 < matrix.GetLength(0) && j2 < matrix.GetLength(1))
+                        {
+                            if (matrix[i2, j2].R != 125 && (matrix[i2, j2].R < threshold || ColorDistance(result.image[i2, j2], result.image[i, j]) < threshold))
+                            {
+                                spreadingPoints.Add((i2, j2));
+                                matrix[i2, j2].R = 125;
+                            }
+                        }
+                    }
+
+                    spreadingPoints.RemoveAt(k);
+                }
+            }
+
+            Pixel replacementPixel = new Pixel(colorHex);
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    if (matrix[i, j].R == 125)
+                        result.image[i, j] = replacementPixel;
+                }
+            }
+
+
+            return result;
         }
     }
 }

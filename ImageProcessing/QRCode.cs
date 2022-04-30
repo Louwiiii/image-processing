@@ -437,9 +437,10 @@ namespace ImageProcessing
 
         public string Read()
         {
-            Pixel[,] matrix = this.image;
+            if (this.image == null) // No QR Code found
+                return null;
 
-            this.image = matrix;
+            Pixel[,] matrix = this.image;
 
             int version = (matrix.GetLength(0) - 21)/4 + 1;
             Console.WriteLine("\nVersion: " + version);
@@ -591,7 +592,7 @@ namespace ImageProcessing
             Pixel[,] matrix = image.image;
 
             int moduleSize; // Size of a module in pixels (only integers)
-            int threshold = 10; // Threshold for pixel to be considered as black (under 10) or white (above 245)
+            int threshold = 16; // Threshold for pixel to be considered as black (under 10) or white (above 245)
 
             int size = matrix.GetLength(0); // The size in pixels of the QR Code
             (int, int) topLeft = (0, 0); // Line and column of the top left pixel of the QR Code
