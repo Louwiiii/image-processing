@@ -1,19 +1,10 @@
-﻿using System;
+﻿using ImageProcessing;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using ImageProcessing;
-using System.IO;
 
 namespace ImageProcessingInterface
 {
@@ -132,6 +123,16 @@ namespace ImageProcessingInterface
                 ErrorText.Text = "";
         }
 
+        public void Import(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        /// <summary>
+        /// Reset the modified image
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void Reset(object sender, RoutedEventArgs e)
         {
             if (availableBitmaps.Length > 0)
@@ -142,6 +143,8 @@ namespace ImageProcessingInterface
                 ModifiedImage = new MyImage(source);
             }
         }
+
+
 
         public void FiltreGris(object sender, RoutedEventArgs e)
         {
@@ -158,7 +161,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
         }
 
@@ -172,7 +175,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
         }
         public void Rotation(object sender, RoutedEventArgs e)
@@ -185,7 +188,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
         }
 
@@ -237,7 +240,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
             
         }
@@ -259,7 +262,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
         }
 
@@ -274,7 +277,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
             
         }
@@ -288,7 +291,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
         }
 
@@ -301,7 +304,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
         }
 
@@ -316,7 +319,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
         }
 
@@ -331,7 +334,7 @@ namespace ImageProcessingInterface
             }
             catch (Exception ex)
             {
-                ShowError(ex.ToString().Split('\n')[0].Trim());
+                ShowError(ex.Message);
             }
         }
 

@@ -71,12 +71,12 @@
                             <TextBlock HorizontalAlignment="Left">Tolérance</TextBlock>
                             <Slider Width="200" Name="ThresholdInput"  VerticalAlignment="Top" Value="5" Margin="25,0,0,0"></Slider>
                         </DockPanel>
-                        
+
                     </Grid>
                 </Button>
 
                 <Separator BorderThickness="1" Height="1"></Separator>
-                
+
                 <TextBlock Padding="5" Height="25" Background="LightBlue" TextAlignment="Center">Mandelbrot</TextBlock>
                 <DockPanel Height="25" Background="LightBlue">
                     <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Width="150" Text="Largeur d'image (px):"/>
@@ -133,13 +133,14 @@
             </StackPanel>
         </ScrollViewer>
 
+        <Button Click="Import" Content="Importer une image" HorizontalAlignment="Left" Margin="231,125,0,25" VerticalAlignment="Top"/>
         <Button Click = "PreviousImage" Content="&lt;" HorizontalAlignment="Left" Margin="20,254,0,0" VerticalAlignment="Top"  FontSize="30" Height="60" Width="60"/>
         <Image x:Name="SelectedImage" Margin="125,0,525,135" HorizontalAlignment="Left" MaxHeight="200" VerticalAlignment="Bottom" Stretch="Uniform" Source="DefaultImage.jpg" RenderOptions.BitmapScalingMode="NearestNeighbor" OpacityMask="Black"/>
         <Button Click = "NextImage" Content="&gt;" HorizontalAlignment="Left" Margin="480,259,0,0" VerticalAlignment="Top" FontSize="30" Height="60" Width="60"/>
         <TextBlock Name="FileNameText" Height="25" MinWidth="100" Width="324" VerticalAlignment="Bottom" TextAlignment="Center" HorizontalAlignment="Left" Foreground="White" Margin="118,0,0,100"></TextBlock>
         <TextBox Name="ImageNameInput"  Text="NewImage" MaxWidth="200" Height="25" Margin="60,0,453,50" VerticalAlignment="Bottom"/>
         <Button Click="Save" Content="Sauvegarder l'image" HorizontalAlignment="Left" Margin="231,0,0,25" VerticalAlignment="Bottom"/>
-        <TextBlock Name="ErrorText" Height="25" Foreground="Red" TextAlignment="Center" VerticalAlignment="Bottom" Margin="35,0,435,349"/>
+        <TextBlock Name="ErrorText" Height="25" Foreground="Red" TextAlignment="Center" VerticalAlignment="Bottom" Margin="35,0,435,332"/>
     </Grid>
 
 </Window>
