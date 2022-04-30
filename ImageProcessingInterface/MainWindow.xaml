@@ -1,0 +1,145 @@
+﻿<Window x:Class="ImageProcessingInterface.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImageProcessingInterface"
+        mc:Ignorable="d"
+        Title="Problème Scientifique informatique" 
+        Height="540"
+        Width="960"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid Background="#FF001A80" Opacity="1.0">
+        <Label Content=" Projet Scientifique Informatique " HorizontalAlignment="Center" VerticalAlignment="Top" FontFamily="Magneto" FontSize="36" Foreground="#FFA4E6F8" Margin="0,10,0,0"/>
+        <Label Content=" Quelle fonction voulez-vous appliquer ? " Foreground="White" FontSize="16" FontFamily="Cambria" Margin="0,112,42,0" HorizontalAlignment="Right" VerticalAlignment="Top" Width="305"/>
+        <Label Content=" Codé par Louis GAUTHIER et Lucie GALLOIS" Foreground="#FFA4E6F8" FontFamily="Malgun Gothic" Margin="0,60,0,0" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Center" Width="440"/>
+        <!--<ScrollViewer Margin="50, 100" VerticalAlignment="Bottom"  HorizontalAlignment="Right" Width="200">
+            <StackPanel>
+                <Button Click="Choix1" Content=" Modifier une image : " Background="#FF02134D" Foreground="White" FontFamily="Cambria Math"/>
+
+                <Button Click="Choix2" Content=" Créer une image : " Background="#FF02134D" Foreground="White" FontFamily="Cambria Math"/>
+
+                <Button Click="Choix3" Content=" Cacher/Découvrir une image : " Background="#FF02134D" Foreground="White" FontFamily="Cambria Math"/>
+
+                <Button Content=" Créer un QR Code : " Background="#FF02134D" Foreground="White" FontFamily="Cambria Math"/>
+                <Button Content=" Lire un QR Code : " Background="#FF02134D" Foreground="White" FontFamily="Cambria Math"/>
+
+            </StackPanel>
+        </ScrollViewer>-->
+
+        <ScrollViewer Margin="0,150,50,0" VerticalAlignment="Top"  HorizontalAlignment="Right" Width="320" Height="339">
+            <StackPanel>
+                <TextBlock Padding="5" Height="25" Background="LightBlue" TextAlignment="Center">Appliquer une fonction à l'image</TextBlock>
+                <Button Click ="Reset" Content ="Réinitialiser à l'image initiale" Foreground="Black"/>
+                <Button Click ="FiltreGris" Content ="Filtre nuance de gris " Foreground="Black"/>
+                <Button Click="ChangeTint"  Foreground="Black">
+                    <DockPanel Width="275">
+                        <TextBlock HorizontalAlignment="Left">Change la teinte</TextBlock>
+                        <TextBox HorizontalAlignment="Right" Name="TintInput" Height="20" Text="#FF0000" Width="150"/>
+                    </DockPanel>
+                </Button>
+
+                <Button Click="Redimensionner"  Foreground="Black">
+                    <DockPanel Width="275">
+                        <TextBlock HorizontalAlignment="Left">Redimensionner</TextBlock>
+                        <TextBox HorizontalAlignment="Right" Name="ResizeInput" Height="20" Text="x1.5" Width="150"/>
+                    </DockPanel>
+                </Button>
+
+                <Button Click="Rotation" Foreground="Black">
+                    <DockPanel Width="275">
+                        <TextBlock HorizontalAlignment="Left">Rotation</TextBlock>
+                        <TextBox HorizontalAlignment="Right" Name="RotationInput" Height="20" Text="30°" Width="150"/>
+                    </DockPanel>
+                </Button>
+                <Button Click ="EffetMiroir" Content ="Effet Miroir "  Foreground="Black"/>
+                <Button Click ="DetectionContour" Content ="Détection des contours " Foreground="Black"/>
+                <Button Click ="RenforcementBord" Content ="Renforcement des bords "  Foreground="Black"/>
+                <Button Click ="FiltreFlou" Content ="Filtre flou "  Foreground="Black"/>
+                <Button Click ="Sharpen" Content ="Amélioration de la netteté"  Foreground="Black"/>
+                <Button Click ="FiltreRepoussage" Content ="Filtre repoussage "  Foreground="Black"/>
+                <Button Click ="Histogram" Content ="Histogramme"  Foreground="Black"/>
+
+                <Button Click="RemoveBackground" Foreground="Black" Height="50">
+                    <Grid>
+                        <DockPanel Margin="0,0,0,20" VerticalAlignment="Top" Width="275">
+                            <TextBlock HorizontalAlignment="Left">Effacer l'arrière plan</TextBlock>
+                            <TextBox HorizontalAlignment="Right" Name="BackgroundColorInput" Height="20" Text="#000000" Width="150"/>
+                        </DockPanel>
+
+                        <DockPanel Margin="0,20,0,0" VerticalAlignment="Top" Width="275">
+                            <TextBlock HorizontalAlignment="Left">Tolérance</TextBlock>
+                            <Slider Width="200" Name="ThresholdInput"  VerticalAlignment="Top" Value="5" Margin="25,0,0,0"></Slider>
+                        </DockPanel>
+                        
+                    </Grid>
+                </Button>
+
+                <Separator BorderThickness="1" Height="1"></Separator>
+                
+                <TextBlock Padding="5" Height="25" Background="LightBlue" TextAlignment="Center">Mandelbrot</TextBlock>
+                <DockPanel Height="25" Background="LightBlue">
+                    <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Width="150" Text="Largeur d'image (px):"/>
+                    <TextBox HorizontalAlignment="Right" Name="MandelbrotWidthInput" Width="150" Text="1000" Height="20"/>
+                </DockPanel>
+                <DockPanel Height="25" Background="LightBlue">
+                    <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Width="150" Text="Iterations:"/>
+                    <TextBox HorizontalAlignment="Right" Name="MandelbrotIterationsInput" Width="150" Text="100" Height="20"/>
+                </DockPanel>
+                <DockPanel Height="25" Background="LightBlue">
+                    <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Width="75" Text="Center X:"/>
+                    <TextBox HorizontalAlignment="Right" Name="MandelbrotCenterXInput" Width="75" Text="0" Height="20"/>
+                    <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Width="75" Text="Center Y:"/>
+                    <TextBox HorizontalAlignment="Right" Name="MandelbrotCenterYInput" Width="75" Text="0" Height="20"/>
+                </DockPanel>
+                <DockPanel Height="25" Background="LightBlue">
+                    <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Width="75" Text="Largeur Rect:"/>
+                    <TextBox HorizontalAlignment="Right" Name="MandelbrotRectWidth" Width="75" Text="3" Height="20"/>
+                    <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Width="75" Text="Hauteur Rect:"/>
+                    <TextBox HorizontalAlignment="Right" Name="MandelbrotRectHeight" Width="75" Text="2" Height="20"/>
+                </DockPanel>
+                <Button Click ="Mandelbrot" Content ="Générer"  Foreground="Black"/>
+
+                <Separator BorderThickness="1" Height="1"></Separator>
+
+                <TextBlock Padding="5" Height="25" Background="LightBlue" TextAlignment="Center">QR Code</TextBlock>
+                <DockPanel Height="25" Background="LightBlue">
+                    <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Width="150" Text="Texte:"/>
+                    <TextBox HorizontalAlignment="Right" Name="QRCodeInput" Width="150" Text="" Height="20"/>
+                </DockPanel>
+                <Button Click ="CreateQRCode" Content="Générer"  Foreground="Black"/>
+
+                <TextBlock Padding="5" Height="25" Background="LightBlue" TextAlignment="Center">Lecture QR Code</TextBlock>
+                <DockPanel Height="25" Background="LightBlue">
+                    <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Text="Sortie:"/>
+                    <TextBox HorizontalAlignment="Right" Name="QRCodeOutput" Width="150" Text="" Height="20"/>
+                </DockPanel>
+                <Button Click ="ReadQRCode" Content="Lire"  Foreground="Black"/>
+
+                <Separator BorderThickness="1" Height="1"></Separator>
+
+                <TextBlock Padding="5" Height="25" Background="LightBlue" TextAlignment="Center">Cacher image</TextBlock>
+                <DockPanel Height="25" Background="LightBlue">
+                    <TextBlock HorizontalAlignment="Left" TextAlignment="Center" Width="150" Text="Image cachante: "/>
+                    <TextBox HorizontalAlignment="Right" Name="HidingImageText" Width="150" Text="" Height="20"/>
+                </DockPanel>
+                <Button Click ="SelectHidingImage" Content="Sélectionner l'image cachante"  Foreground="Black"/>
+                <Button Click ="HideImage" Content="Cacher l'image"  Foreground="Black"/>
+
+                <TextBlock Padding="5" Height="25" Background="LightBlue" TextAlignment="Center">Découvrir image</TextBlock>
+                <Button Click ="DiscoverImage" Content="Découvrir"  Foreground="Black"/>
+
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Button Click = "PreviousImage" Content="&lt;" HorizontalAlignment="Left" Margin="20,254,0,0" VerticalAlignment="Top"  FontSize="30" Height="60" Width="60"/>
+        <Image x:Name="SelectedImage" Margin="125,0,525,135" HorizontalAlignment="Left" MaxHeight="200" VerticalAlignment="Bottom" Stretch="Uniform" Source="DefaultImage.jpg" RenderOptions.BitmapScalingMode="NearestNeighbor" OpacityMask="Black"/>
+        <Button Click = "NextImage" Content="&gt;" HorizontalAlignment="Left" Margin="480,259,0,0" VerticalAlignment="Top" FontSize="30" Height="60" Width="60"/>
+        <TextBlock Name="FileNameText" Height="25" MinWidth="100" Width="324" VerticalAlignment="Bottom" TextAlignment="Center" HorizontalAlignment="Left" Foreground="White" Margin="118,0,0,100"></TextBlock>
+        <TextBox Name="ImageNameInput"  Text="NewImage" MaxWidth="200" Height="25" Margin="60,0,453,50" VerticalAlignment="Bottom"/>
+        <Button Click="Save" Content="Sauvegarder l'image" HorizontalAlignment="Left" Margin="231,0,0,25" VerticalAlignment="Bottom"/>
+        <TextBlock Name="ErrorText" Height="25" Foreground="Red" TextAlignment="Center" VerticalAlignment="Bottom" Margin="35,0,435,349"/>
+    </Grid>
+
+</Window>
