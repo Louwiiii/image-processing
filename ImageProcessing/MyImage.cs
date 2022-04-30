@@ -89,11 +89,14 @@ namespace ImageProcessing
         /// <summary>
         /// Reads a .bmp file and creates a MyImage object from it
         /// </summary>
-        public MyImage(string filepath)
+        public MyImage(string filepath, bool absolute=false)
         {
             byte[] bytes;
 
-            bytes = File.ReadAllBytes(filepath);
+            if (absolute)
+                bytes = File.ReadAllBytes(@filepath);
+            else
+                bytes = File.ReadAllBytes(filepath);
 
             Console.WriteLine("\nReading image: " + filepath);
             Console.WriteLine("File header");
@@ -210,6 +213,11 @@ namespace ImageProcessing
         /// <param name="filepath">The filepath of the exported image</param>
         public void FromImageToFile(string filepath)
         {
+            File.WriteAllBytes(filepath, this.ToFileStream());
+        }
+
+        public byte[] ToFileStream()
+        {
             //this.dibHeaderSize = 40; // Other dib header sizes are not supported
             this.compressionMethod = 0; // Other methods are not supported
 
@@ -260,7 +268,7 @@ namespace ImageProcessing
             fichier.AddRange(ConvertIntToEndian(this.numberOfImportantColors, 4));
 
             //Add padding until the fileDataOffset
-            fichier.AddRange(Enumerable.Repeat((byte) 0, fileDataOffset - fichier.Count));
+            fichier.AddRange(Enumerable.Repeat((byte)0, fileDataOffset - fichier.Count));
 
             for (int i = bitmapHeight - 1; i >= 0; i--)
             {
@@ -283,8 +291,7 @@ namespace ImageProcessing
                 }
             }
 
-
-            File.WriteAllBytes(filepath, fichier.ToArray());
+            return fichier.ToArray();
         }
 
         /// <summary>

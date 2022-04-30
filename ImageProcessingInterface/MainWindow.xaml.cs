@@ -14,8 +14,19 @@ namespace ImageProcessingInterface
     public partial class MainWindow : Window
     {
         static int selectedImageIndex;
+        static string currentSource; // The source of the currently modified image
 
-        MyImage ModifiedImage;
+        MyImage modifiedImage;
+        MyImage ModifiedImage
+        {
+            get { return modifiedImage; }
+            set
+            {
+                modifiedImage = value;
+                LoadModifiedImage();
+            }
+        }
+
 
         public static int SelectedImageIndex
         {
@@ -27,9 +38,12 @@ namespace ImageProcessingInterface
                     selectedImageIndex = 0;
                     return;
                 }
+
                 selectedImageIndex = value % availableBitmaps.Length;
                 while (selectedImageIndex < 0)
                     selectedImageIndex += availableBitmaps.Length;
+                
+                currentSource = availableBitmaps[selectedImageIndex];
             }
         }
         public static string[] availableBitmaps = new string[0];
@@ -42,23 +56,27 @@ namespace ImageProcessingInterface
             Reset(null, null);
             if (availableBitmaps.Length > 0)
             {
-                SaveTemp();
-                ChangeImageSource(availableBitmaps[selectedImageIndex]);
+                ChangeImageSource(currentSource);
             }
         }
 
-        public void ChangeImageSource(string source)
+        public void LoadModifiedImage()
         {
             BitmapImage bi = new BitmapImage();
-            using (var fs = new FileStream(source, FileMode.Open, FileAccess.Read))
+            using (var fs = new MemoryStream(ModifiedImage.ToFileStream()))
             {
                 bi.BeginInit();
                 bi.CacheOption = BitmapCacheOption.OnLoad;
                 bi.StreamSource = fs;
                 bi.EndInit();
             }
-            FileNameText.Text = source.Split("\\")[source.Split("\\").Length - 1];
             SelectedImage.Source = bi;
+        }
+
+        public void ChangeImageSource(string source)
+        {
+            ModifiedImage = new MyImage(source, true);
+            ImageNameInput.Text = source.Split("\\")[source.Split("\\").Length - 1].Replace(".bmp", ""); ;
         }
 
         public static string[] UpdateAvailableBitmaps()
@@ -91,12 +109,13 @@ namespace ImageProcessingInterface
             Reset(sender, e);
         }
 
+        /*
         void SaveTemp()
         {
             ModifiedImage.FromImageToFile(Directory.GetCurrentDirectory() + "\\images\\.temp.bmp");
             ChangeImageSource(Directory.GetCurrentDirectory() + "\\images\\.temp.bmp");
             //File.Delete(Directory.GetCurrentDirectory() + "\\images\\.temp.bmp");
-        }
+        }*/
 
         void Save(object sender, RoutedEventArgs e)
         {
@@ -125,7 +144,16 @@ namespace ImageProcessingInterface
 
         public void Import(object sender, RoutedEventArgs e)
         {
-            
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+
+            dialog.DefaultExt = ".png";
+            dialog.Filter = "BMP Image Files|*.bmp";
+
+            if (dialog.ShowDialog() == true)
+            {
+                currentSource = dialog.FileName;
+                ChangeImageSource(currentSource);
+            }
         }
 
         /// <summary>
@@ -137,7 +165,7 @@ namespace ImageProcessingInterface
         {
             if (availableBitmaps.Length > 0)
             {
-                string source = availableBitmaps[selectedImageIndex];
+                string source = currentSource;
                 ImageNameInput.Text = source.Split("\\")[source.Split("\\").Length - 1].Replace(".bmp", "");
                 ChangeImageSource(source);
                 ModifiedImage = new MyImage(source);
@@ -149,7 +177,6 @@ namespace ImageProcessingInterface
         public void FiltreGris(object sender, RoutedEventArgs e)
         {
             ModifiedImage = ModifiedImage.ToShadesOfGrey();
-            SaveTemp();
         }
 
         public void ChangeTint(object sender, RoutedEventArgs e)
@@ -157,7 +184,6 @@ namespace ImageProcessingInterface
             try
             {
                 ModifiedImage = ModifiedImage.ChangedTint(TintInput.Text);
-                SaveTemp();
             }
             catch (Exception ex)
             {
@@ -171,7 +197,6 @@ namespace ImageProcessingInterface
             {
                 float factor = float.Parse(ResizeInput.Text.Replace(".", ",").Replace("x", ""));
                 ModifiedImage = ModifiedImage.Resized(factor);
-                SaveTemp();
             }
             catch (Exception ex)
             {
@@ -184,7 +209,6 @@ namespace ImageProcessingInterface
             {
                 float factor = float.Parse(RotationInput.Text.Replace(".", ",").Replace("°", ""));
                 ModifiedImage = ModifiedImage.Rotation(factor);
-                SaveTemp();
             }
             catch (Exception ex)
             {
@@ -195,39 +219,32 @@ namespace ImageProcessingInterface
         public void EffetMiroir(object sender, RoutedEventArgs e)
         {
             ModifiedImage = ModifiedImage.EffetMiroir();
-            SaveTemp();
         }
         public void DetectionContour(object sender, RoutedEventArgs e)
         {
             ModifiedImage = ModifiedImage.BorderDetection();
-            SaveTemp();
         }
         public void RenforcementBord(object sender, RoutedEventArgs e)
         {
             ModifiedImage = ModifiedImage.EdgeReinforcement();
-            SaveTemp();
         }
         public void FiltreFlou(object sender, RoutedEventArgs e)
         {
             ModifiedImage = ModifiedImage.Blur();
-            SaveTemp();
         }
 
         public void Sharpen(object sender, RoutedEventArgs e)
         {
             ModifiedImage = ModifiedImage.Sharpen();
-            SaveTemp();
         }
         public void FiltreRepoussage(object sender, RoutedEventArgs e)
         {
             ModifiedImage = ModifiedImage.Emboss();
-            SaveTemp();
         }
 
         public void Histogram(object sender, RoutedEventArgs e)
         {
             ModifiedImage = ModifiedImage.Histogram();
-            SaveTemp();
         }
 
         public void RemoveBackground(object sender, RoutedEventArgs e)
@@ -236,7 +253,6 @@ namespace ImageProcessingInterface
             {
                 double threshold = (ThresholdInput.Value * 2f);
                 ModifiedImage = ModifiedImage.RemoveBackground(BackgroundColorInput.Text, threshold);
-                SaveTemp();
             }
             catch (Exception ex)
             {
@@ -257,7 +273,6 @@ namespace ImageProcessingInterface
                 double rectHeight = double.Parse(MandelbrotRectHeight.Text.Replace(".", ","));
 
                 ModifiedImage = MyImage.Mandelbrot(width, iterations, centerX, centerY, rectWidth, rectHeight);
-                SaveTemp();
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)
@@ -272,7 +287,6 @@ namespace ImageProcessingInterface
             {
                 string content = QRCodeInput.Text;
                 ModifiedImage = new QRCode(content);
-                SaveTemp();
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)
@@ -299,7 +313,7 @@ namespace ImageProcessingInterface
         {
             try
             {
-                string source = availableBitmaps[selectedImageIndex];
+                string source = currentSource;
                 HidingImageText.Text = source.Split("\\")[source.Split("\\").Length - 1].Replace(".bmp", "");
             }
             catch (Exception ex)
@@ -314,7 +328,6 @@ namespace ImageProcessingInterface
             {
                 string sourceHiding = Directory.GetCurrentDirectory() + "\\images\\" + HidingImageText.Text + ".bmp";
                 ModifiedImage = ModifiedImage.HideIn(new MyImage(sourceHiding));
-                SaveTemp();
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)
@@ -327,9 +340,8 @@ namespace ImageProcessingInterface
         {
             try
             {
-                string source = availableBitmaps[selectedImageIndex];
+                string source = currentSource;
                 ModifiedImage = ModifiedImage.DiscoverImage().Item1;
-                SaveTemp();
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)
