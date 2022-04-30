@@ -8,10 +8,6 @@ namespace ImageProcessing
     {
         static void Main(string[] args)
         {
-            MyImage temp = new MyImage("images/portrait.bmp");
-            temp.FromImageToFile("images/portrait2.bmp");
-
-            Console.ReadKey();
         }
     }
 }
