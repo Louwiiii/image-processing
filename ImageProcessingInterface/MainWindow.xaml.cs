@@ -313,8 +313,7 @@ namespace ImageProcessingInterface
         {
             try
             {
-                string source = currentSource;
-                HidingImageText.Text = source.Split("\\")[source.Split("\\").Length - 1].Replace(".bmp", "");
+                HidingImageText.Text = currentSource;
             }
             catch (Exception ex)
             {
@@ -326,7 +325,7 @@ namespace ImageProcessingInterface
         {
             try
             {
-                string sourceHiding = Directory.GetCurrentDirectory() + "\\images\\" + HidingImageText.Text + ".bmp";
+                string sourceHiding = HidingImageText.Text;
                 ModifiedImage = ModifiedImage.HideIn(new MyImage(sourceHiding));
                 ImageNameInput.Text = "NewImage";
             }
@@ -336,12 +335,26 @@ namespace ImageProcessingInterface
             }
         }
 
-        public void DiscoverImage(object sender, RoutedEventArgs e)
+        public void DiscoverHiddenImage(object sender, RoutedEventArgs e)
         {
             try
             {
                 string source = currentSource;
                 ModifiedImage = ModifiedImage.DiscoverImage().Item1;
+                ImageNameInput.Text = "NewImage";
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex.Message);
+            }
+        }
+
+        public void DiscoverHidingImage(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string source = currentSource;
+                ModifiedImage = ModifiedImage.DiscoverImage().Item2;
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)

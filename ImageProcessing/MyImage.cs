@@ -216,16 +216,20 @@ namespace ImageProcessing
             File.WriteAllBytes(filepath, this.ToFileStream());
         }
 
+        /// <summary>
+        /// Converts image to a byte array that represents a bitmap image file
+        /// </summary>
+        /// <returns>The file as a byte array</returns>
         public byte[] ToFileStream()
         {
             //this.dibHeaderSize = 40; // Other dib header sizes are not supported
             this.compressionMethod = 0; // Other methods are not supported
 
             List<byte> fichier = new List<byte>();
+
             // File header
 
             //this.fileType
-
             fichier.Add((byte)this.fileType[0]);
             fichier.Add((byte)this.fileType[1]);
 
@@ -274,10 +278,11 @@ namespace ImageProcessing
             {
                 for (int j = 0; j < bitmapWidth; j++)
                 {
+                    // Add each pixel's bytes to the byte array
                     byte[] pixelData;
-                    if (numberOfBitsPerPixel == 24)
+                    if (numberOfBitsPerPixel == 24) // Only RGB
                         pixelData = new byte[] { (byte)image[i, j].B, (byte)image[i, j].G, (byte)image[i, j].R };
-                    else if (numberOfBitsPerPixel == 32)
+                    else if (numberOfBitsPerPixel == 32) // RGBA
                         pixelData = new byte[] { (byte)image[i, j].B, (byte)image[i, j].G, (byte)image[i, j].R, (byte)image[i, j].A };
                     else
                         throw new Exception("Number of bits per pixel for this image not supported");
@@ -285,6 +290,7 @@ namespace ImageProcessing
                     fichier.AddRange(pixelData);
                 }
 
+                // Add the padding bytes to the file
                 for (int k = 0; k < padding; k++)
                 {
                     fichier.Add(0);
@@ -376,6 +382,11 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Changes the tint of the image to a color
+        /// </summary>
+        /// <param name="hexColor">The color string in hexadecimal</param>
+        /// <returns></returns>
         public MyImage ChangedTint (string hexColor)
         {
             Pixel color = new Pixel(hexColor);
@@ -522,6 +533,7 @@ namespace ImageProcessing
             {
                 for (int j = 0; j < result.bitmapWidth; j++)
                 {
+                    // We find the corresponding pixel on the image that will be placed at this position on the resulting image
                     result.image[i, j] = this.image[(int)(i * (double)this.bitmapHeight / result.bitmapHeight), (int)(j * (double)this.bitmapWidth / result.bitmapWidth)];
                 }
             }
@@ -768,7 +780,7 @@ namespace ImageProcessing
         /// <returns></returns>
         public static MyImage Mandelbrot(int width, int iterations = 100, double centerX = 0, double centerY = 0, double rectWidth = 3f, double rectHeight = 2f)
         {
-            int height = (int) (rectHeight * width/rectWidth);
+            int height = (int) (rectHeight * width/rectWidth); // The height of the image depends on the width and the dimensions of the viewRect
             MyImage fract = new MyImage(width, height);
 
             for (int i = 0; i < height; i++)
@@ -776,6 +788,7 @@ namespace ImageProcessing
                 for (int j = 0; j < width; j++)
                 {
                     
+                    // The corresponding coordinates of the pixel in the Manderlbrot coordinate system
                     double x = (j * rectWidth / width) - (rectWidth / 2) + centerX;
                     double y = (rectHeight / 2) - (i * rectHeight / height) + centerY;
 
@@ -783,11 +796,12 @@ namespace ImageProcessing
                     Complex coordinates = new Complex(x, y);
                     for (int k = 0; k < iterations; k++)
                     {
+                        // The mandelbrot formulate to find the terms of the sequence
                         z = (z * z) + coordinates;
                         double moduleZ = Math.Sqrt(z.Real * z.Real + z.Imaginary * z.Imaginary);
-                        if (moduleZ > 2)
+                        if (moduleZ > 2) // If the point is not in the mandelbrot set, change the brightness of the pixel
                         {
-                            fract.image[i, j] = new Pixel(255 * (iterations - k)/iterations, 255 * (iterations - k) / iterations, 255);
+                            fract.image[i, j] = new Pixel(255 * (iterations - k)/iterations, 255 * (iterations - k) / iterations, 255 * (iterations - k) / iterations);
                             break;
                         }
                     }
@@ -813,6 +827,7 @@ namespace ImageProcessing
             {
                 for (int j = 0; j < containerImage.image.GetLength(1); j++)
                 {
+                    // We store the 4 MSB of the hidden image in the 4 LSB of the hiding image
                     if (i < hiddenImage.image.GetLength(0) && j < hiddenImage.image.GetLength(1))
                     {
                         result.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)containerImage.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4) + Convert.ToString(((byte)hiddenImage.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4), 2);
@@ -832,7 +847,7 @@ namespace ImageProcessing
 
 
         /// <summary>
-        /// 
+        /// Get back the image hidden in the image
         /// </summary>
         /// <returns>Hidden image and container image</returns>
         public (MyImage, MyImage) DiscoverImage()
@@ -843,10 +858,12 @@ namespace ImageProcessing
             {
                 for (int j = 0; j < imagecachante.image.GetLength(1); j++)
                 {
+                    // Get the 4 MSB
                     imagecachante.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].R), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
                     imagecachante.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].G), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
                     imagecachante.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].B), 2).PadLeft(8, '0').Substring(0, 4) + "0000", 2);
 
+                    // Get the 4 LSB
                     imagecachee.image[i, j].R = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].R), 2).PadLeft(8, '0').Substring(4, 4) + "0000", 2);
                     imagecachee.image[i, j].G = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].G), 2).PadLeft(8, '0').Substring(4, 4) + "0000", 2);
                     imagecachee.image[i, j].B = Convert.ToInt32(Convert.ToString(((byte)this.image[i, j].B), 2).PadLeft(8, '0').Substring(4, 4) + "0000", 2);
@@ -855,46 +872,57 @@ namespace ImageProcessing
             return (imagecachee, imagecachante);
         }
 
+        /// <summary>
+        /// Get the distance (how close they are) between 2 colors
+        /// </summary>
+        /// <param name="col1">A pixel of the first color</param>
+        /// <param name="col2">A pixel of the second color</param>
+        /// <returns></returns>
         public static double ColorDistance (Pixel col1, Pixel col2)
         {
             return Math.Sqrt(Math.Pow(col2.R - col1.R, 2) + Math.Pow(col2.G - col1.G, 2) + Math.Pow(col2.B - col1.B, 2));
         }
 
+        /// <summary>
+        /// Remove the background from an image
+        /// </summary>
+        /// <param name="colorHex">The hexadecimal string of the color that will replace the background</param>
+        /// <param name="threshold">The tolerance with which a pixel is considered to be from the background or not</param>
+        /// <returns></returns>
         public MyImage RemoveBackground (string colorHex="#000000", double threshold = 5)
         {
             MyImage result = this.Clone();
 
             Pixel[,] matrix = result.BorderDetection().image; // Matrix used for border detection
 
+            // Change the resulting pixels to binary values (wheter or not it's considered as a border according to the threshold)
             for (int i = 0; i < matrix.GetLength(0); i++) 
             {
                 for (int j = 0; j < matrix.GetLength(1); j++)
                 {
-                    if (matrix[i, j].Max > threshold)
+                    if (matrix[i, j].Max >= threshold)
                         matrix[i, j] = new Pixel(255, 255, 255);
                     else
                         matrix[i, j] = new Pixel(0, 0, 0);
                 }
             }
 
+            Pixel mark = new Pixel(125, 0, 0);
+
             // Link the white pixels that are very close
             MyImage temp = result.Clone();
             temp.image = matrix;
             matrix = temp.Blur().image;
 
+            List<(int, int)> spreadingPoints = new List<(int, int)> {(0, 0), (matrix.GetLength(0) - 1, 0), (matrix.GetLength(0) - 1, matrix.GetLength(1) - 1), (0, matrix.GetLength(1) - 1) };
 
-            // We must find the best point on the outside of the image to start (the point in the middle of the biggest area of black pixels)
+            foreach ((int i, int j) in spreadingPoints)
+            {
+                matrix[i, j] = mark;
+            }
 
-            // We average the color of the background
-            Pixel bgColor = matrix[0, 0];
 
-            (int, int) bestIJ = (0, 0);
-
-            matrix[bestIJ.Item1, bestIJ.Item2] = new Pixel(125, 0, 0);
-
-            List<(int, int)> spreadingPoints = new List<(int, int)> { bestIJ, (matrix.GetLength(0) - 1, 0), (matrix.GetLength(0) - 1, matrix.GetLength(1) - 1), (0, matrix.GetLength(1) - 1) };
-
-            // We spread the red background
+            // We spread the red background from the 4 corners
             while (spreadingPoints.Count > 0)
             {
                 for (int k = spreadingPoints.Count - 1; k >= 0; k--)
@@ -905,10 +933,10 @@ namespace ImageProcessing
                     {
                         if (i2 >= 0 && j2 >= 0 && i2 < matrix.GetLength(0) && j2 < matrix.GetLength(1))
                         {
-                            if (matrix[i2, j2].R != 125 && (matrix[i2, j2].R < threshold || ColorDistance(result.image[i2, j2], result.image[i, j]) < threshold))
+                            if (matrix[i2, j2] != mark && (matrix[i2, j2].R <= threshold || ColorDistance(result.image[i2, j2], result.image[i, j]) <= threshold))
                             {
                                 spreadingPoints.Add((i2, j2));
-                                matrix[i2, j2].R = 125;
+                                matrix[i2, j2] = mark;
                             }
                         }
                     }
@@ -917,12 +945,13 @@ namespace ImageProcessing
                 }
             }
 
+            // We replace the red background with the background color
             Pixel replacementPixel = new Pixel(colorHex);
             for (int i = 0; i < matrix.GetLength(0); i++)
             {
                 for (int j = 0; j < matrix.GetLength(1); j++)
                 {
-                    if (matrix[i, j].R == 125)
+                    if (matrix[i, j] == mark)
                         result.image[i, j] = replacementPixel;
                 }
             }

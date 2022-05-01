@@ -101,6 +101,16 @@ namespace ImageProcessing
             this.a = 255;
         }
 
+        public static bool operator == (Pixel a, Pixel b)
+        {
+            return a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
+        }
+
+        public static bool operator != (Pixel a, Pixel b)
+        {
+            return a.R != b.R || a.G != b.G || a.B != b.B || a.A != b.A; ;
+        }
+
         public override string ToString()
         {
             return R + " " + G + " " + B;

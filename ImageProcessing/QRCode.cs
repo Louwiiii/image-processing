@@ -6,7 +6,9 @@ namespace ImageProcessing
 {
     public class QRCode : MyImage
     {
-        // Mask pattern formulas
+        /// <summary>
+        /// Mask pattern formulas
+        /// </summary>
         static Func<int, int, bool>[] masks = new Func<int, int, bool>[] {
                 (i, j) => (i + j) % 2 == 0,
                 (i, j) => (i) % 2 == 0,
@@ -18,11 +20,20 @@ namespace ImageProcessing
                (i, j) => (((i + j) % 2) +((i * j) % 3) ) % 2 == 0,
             };
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="content"></param>
+        /// <exception cref="Exception"></exception>
         public QRCode(string content) : base(0, 0)
         {
-            content = content.ToUpper();
-            if (!content.All(x => char.IsLetterOrDigit(x) || " $%*+-./:".Contains(x)))
+            content = content.ToUpper(); // Version 5 can only contain 154 characters and other versions are not supported
+            if (content.Length > 154)
+                content = content.Substring(0, 154);
+            if (!content.All(x => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:".Contains(x)))
                 throw new Exception("The entered text is not alpha-numeric");
+
 
             byte mode = 0b0010;
             string encodedMode = Convert.ToString(mode, 2).PadLeft(4, '0');
