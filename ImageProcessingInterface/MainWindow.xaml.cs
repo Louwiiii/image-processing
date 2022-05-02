@@ -299,6 +299,7 @@ namespace ImageProcessingInterface
                 double rectHeight = double.Parse(MandelbrotRectHeight.Text.Replace(".", ","));
 
                 MyImage temp = MyImage.Mandelbrot(width, iterations, centerX, centerY, rectWidth, rectHeight);
+                ModifiedImage = temp;
                 
                 ImageNameInput.Text = "NewImage";
             }
