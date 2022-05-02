@@ -10,7 +10,4 @@
     <None Remove="runtime.osx.10.10-x64.CoreCompat.System.Drawing" />
     <None Remove="SixLabors.ImageSharp" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.1" />
-  </ItemGroup>
 </Project>

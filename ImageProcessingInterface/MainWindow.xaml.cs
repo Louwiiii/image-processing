@@ -13,10 +13,20 @@ namespace ImageProcessingInterface
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// The currently modified and showed image index.
+        /// </summary>
         static int selectedImageIndex;
-        static string currentSource; // The source of the currently modified image
 
+        /// <summary>
+        /// The source of the currently modified image
+        /// </summary>
+        static string currentSource;
+        
         MyImage modifiedImage;
+        /// <summary>
+        /// The currently modified MyImage. When modified, the function showing the image in the application will be called.
+        /// </summary>
         MyImage ModifiedImage
         {
             get { return modifiedImage; }
@@ -27,7 +37,9 @@ namespace ImageProcessingInterface
             }
         }
 
-
+        /// <summary>
+        /// The currently modified and showed image index. The index will cycle through the number of images of the "/images" folder.
+        /// </summary>
         public static int SelectedImageIndex
         {
             get { return selectedImageIndex; }
@@ -46,8 +58,16 @@ namespace ImageProcessingInterface
                 currentSource = availableBitmaps[selectedImageIndex];
             }
         }
+
+        /// <summary>
+        /// The filepaths of the available .bmp images in the "/images" folder
+        /// </summary>
         public static string[] availableBitmaps = new string[0];
 
+        /// <summary>
+        /// The constructor of the MainWindow, called when the application starts.
+        /// Checks which bitmap files are available and selects the first image of the folder.
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -60,6 +80,9 @@ namespace ImageProcessingInterface
             }
         }
 
+        /// <summary>
+        /// Show the modified image in the app
+        /// </summary>
         public void LoadModifiedImage()
         {
             BitmapImage bi = new BitmapImage();
@@ -73,12 +96,20 @@ namespace ImageProcessingInterface
             SelectedImage.Source = bi;
         }
 
+        /// <summary>
+        /// Change the modified image to the given source and load it into the application. Change the content of the textbox under the image to the name of the image.
+        /// </summary>
+        /// <param name="source"></param>
         public void ChangeImageSource(string source)
         {
             ModifiedImage = new MyImage(source, true);
             ImageNameInput.Text = source.Split("\\")[source.Split("\\").Length - 1].Replace(".bmp", ""); ;
         }
 
+        /// <summary>
+        /// Load all the available images of the "/images" folder
+        /// </summary>
+        /// <returns></returns>
         public static string[] UpdateAvailableBitmaps()
         {
             if (!Directory.Exists(Directory.GetCurrentDirectory() + "/images"))
@@ -96,7 +127,6 @@ namespace ImageProcessingInterface
             availableBitmaps = result.ToArray();
             return result.ToArray();
         }
-
         public void PreviousImage(object sender, RoutedEventArgs e)
         {
             SelectedImageIndex--;
@@ -109,6 +139,11 @@ namespace ImageProcessingInterface
             Reset(sender, e);
         }
 
+        /// <summary>
+        /// Save the image in the "/images" folder
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void Save(object sender, RoutedEventArgs e)
         {
             ModifiedImage.FromImageToFile(Directory.GetCurrentDirectory() + "\\images\\" + ImageNameInput.Text + ".bmp");
@@ -128,6 +163,11 @@ namespace ImageProcessingInterface
                 ErrorText.Text = "";
         }
 
+        /// <summary>
+        /// Import an image from the computer
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void Import(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
@@ -157,9 +197,6 @@ namespace ImageProcessingInterface
                 ModifiedImage = new MyImage(source);
             }
         }
-
-
-
         public void FiltreGris(object sender, RoutedEventArgs e)
         {
             ModifiedImage = ModifiedImage.ToShadesOfGrey();
