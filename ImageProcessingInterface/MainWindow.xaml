@@ -9,11 +9,11 @@
         Height="540"
         Width="960"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
-    
-    <Grid Background="#FF001A80" Opacity="1.0">
-        <Label Content=" Projet Scientifique Informatique " HorizontalAlignment="Center" VerticalAlignment="Top" FontFamily="Magneto" FontSize="36" Foreground="#FFA4E6F8" Margin="0,10,0,0"/>
+
+    <Grid Background="#2155CD" Opacity="1.0">
+        <Label Content=" Projet Scientifique Informatique " HorizontalAlignment="Center" VerticalAlignment="Top" FontFamily="Magneto" FontSize="36" Foreground="#E8F9FD" Margin="0,10,0,0"/>
         <Label Content=" Quelle fonction voulez-vous appliquer ? " Foreground="White" FontSize="16" FontFamily="Cambria" Margin="0,112,42,0" HorizontalAlignment="Right" VerticalAlignment="Top" Width="305"/>
-        <Label Content=" Codé par Louis GAUTHIER et Lucie GALLOIS" Foreground="#FFA4E6F8" FontFamily="Malgun Gothic" Margin="0,60,0,0" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Center" Width="440"/>
+        <Label Content=" Codé par Louis GAUTHIER et Lucie GALLOIS" Foreground="#E8F9FD" FontFamily="Malgun Gothic" Margin="0,60,0,0" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Center" Width="440"/>
 
         <ScrollViewer Padding="10" Background="LightBlue" Margin="0,150,50,0" VerticalAlignment="Top"  HorizontalAlignment="Right" Width="340" Height="339">
             <StackPanel>

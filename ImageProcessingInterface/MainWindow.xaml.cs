@@ -109,24 +109,10 @@ namespace ImageProcessingInterface
             Reset(sender, e);
         }
 
-        /*
-        void SaveTemp()
-        {
-            ModifiedImage.FromImageToFile(Directory.GetCurrentDirectory() + "\\images\\.temp.bmp");
-            ChangeImageSource(Directory.GetCurrentDirectory() + "\\images\\.temp.bmp");
-            //File.Delete(Directory.GetCurrentDirectory() + "\\images\\.temp.bmp");
-        }*/
-
         void Save(object sender, RoutedEventArgs e)
         {
             ModifiedImage.FromImageToFile(Directory.GetCurrentDirectory() + "\\images\\" + ImageNameInput.Text + ".bmp");
             UpdateAvailableBitmaps();
-        }
-        public void RetourMenu(object sender, EventArgs e)
-        {
-            MainWindow main = new MainWindow();
-            main.Show();
-            this.Close();
         }
 
         async Task Delay (int milliseconds)
@@ -146,7 +132,7 @@ namespace ImageProcessingInterface
         {
             Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
 
-            dialog.DefaultExt = ".png";
+            dialog.DefaultExt = ".bmp";
             dialog.Filter = "BMP Image Files|*.bmp";
 
             if (dialog.ShowDialog() == true)
@@ -196,7 +182,8 @@ namespace ImageProcessingInterface
             try
             {
                 float factor = float.Parse(ResizeInput.Text.Replace(".", ",").Replace("x", ""));
-                ModifiedImage = ModifiedImage.Resized(factor);
+                MyImage temp = ModifiedImage.Resized(factor);
+                ModifiedImage = temp;
             }
             catch (Exception ex)
             {
@@ -208,7 +195,8 @@ namespace ImageProcessingInterface
             try
             {
                 float factor = float.Parse(RotationInput.Text.Replace(".", ",").Replace("°", ""));
-                ModifiedImage = ModifiedImage.Rotation(factor);
+                MyImage temp = ModifiedImage.Rotation(factor);
+                ModifiedImage = temp;
             }
             catch (Exception ex)
             {
@@ -252,7 +240,8 @@ namespace ImageProcessingInterface
             try
             {
                 double threshold = (ThresholdInput.Value * 2f);
-                ModifiedImage = ModifiedImage.RemoveBackground(BackgroundColorInput.Text, threshold);
+                MyImage temp = ModifiedImage.RemoveBackground(BackgroundColorInput.Text, threshold);
+                ModifiedImage = temp;
             }
             catch (Exception ex)
             {
@@ -272,7 +261,8 @@ namespace ImageProcessingInterface
                 double rectWidth = double.Parse(MandelbrotRectWidth.Text.Replace(".", ","));
                 double rectHeight = double.Parse(MandelbrotRectHeight.Text.Replace(".", ","));
 
-                ModifiedImage = MyImage.Mandelbrot(width, iterations, centerX, centerY, rectWidth, rectHeight);
+                MyImage temp = MyImage.Mandelbrot(width, iterations, centerX, centerY, rectWidth, rectHeight);
+                
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)
@@ -286,7 +276,8 @@ namespace ImageProcessingInterface
             try
             {
                 string content = QRCodeInput.Text;
-                ModifiedImage = new QRCode(content);
+                MyImage temp = new QRCode(content);
+                ModifiedImage = temp;
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)
@@ -326,7 +317,8 @@ namespace ImageProcessingInterface
             try
             {
                 string sourceHiding = HidingImageText.Text;
-                ModifiedImage = ModifiedImage.HideIn(new MyImage(sourceHiding));
+                MyImage temp = ModifiedImage.HideIn(new MyImage(sourceHiding));
+                ModifiedImage = temp;
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)
@@ -340,7 +332,8 @@ namespace ImageProcessingInterface
             try
             {
                 string source = currentSource;
-                ModifiedImage = ModifiedImage.DiscoverImage().Item1;
+                MyImage temp = ModifiedImage.DiscoverImage().Item1;
+                ModifiedImage = temp;
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)
@@ -354,7 +347,8 @@ namespace ImageProcessingInterface
             try
             {
                 string source = currentSource;
-                ModifiedImage = ModifiedImage.DiscoverImage().Item2;
+                MyImage temp = ModifiedImage.DiscoverImage().Item2;
+                ModifiedImage = temp;
                 ImageNameInput.Text = "NewImage";
             }
             catch (Exception ex)

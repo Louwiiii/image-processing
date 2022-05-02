@@ -109,7 +109,7 @@ namespace ImageProcessing
         /// </summary>
         /// <param name="content"></param>
         /// <returns>A string of '0' and '1' representing the encoded content</returns>
-        static string EncodeContent(string content)
+        public static string EncodeContent(string content)
         {
             string result = "";
             for (int i = 0; i < content.Length; i += 2)
@@ -135,7 +135,7 @@ namespace ImageProcessing
         /// </summary>
         /// <param name="character"></param>
         /// <returns></returns>
-        static int EncodeChar(char character)
+        public static int EncodeChar(char character)
         {
             if (char.IsDigit(character))
             {
@@ -159,7 +159,7 @@ namespace ImageProcessing
         /// <param name="correctionLevel"></param>
         /// <param name="mode"></param>
         /// <returns></returns>
-        static int GetCharacterCapacity(int version, char correctionLevel = 'L', byte mode = 0b0010)
+        public static int GetCharacterCapacity(int version, char correctionLevel = 'L', byte mode = 0b0010)
         {
             return InformationTables.Capacities[version][correctionLevel][mode];
         }
