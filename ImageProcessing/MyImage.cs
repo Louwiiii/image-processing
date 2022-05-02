@@ -502,7 +502,7 @@ namespace ImageProcessing
         /// Inverts the image horizontally
         /// </summary>
         /// <returns>The modified image</returns>
-        public MyImage EffetMiroir()
+        public MyImage Mirror()
         {
             MyImage result = this.Clone();
 
@@ -546,11 +546,11 @@ namespace ImageProcessing
         /// </summary>
         /// <param name="kernel"></param>
         /// <returns>The convoluted image</returns>
-        public MyImage Convoluted(float[,] kernel)
+        public MyImage Convoluted(double[,] kernel)
         {
             MyImage result = this.Clone();
 
-            int[][,] resultChannels = new int[3][,];
+            double[][,] resultChannels = new double[3][,];
 
             int[][,] channels = GetChannels(); // Separate the color channels
 
@@ -596,15 +596,15 @@ namespace ImageProcessing
         /// Put the colors of the image from 3 matrices containing the color channels of the image
         /// </summary>
         /// <param name="channels"></param>
-        public void SetChannels(int[][,] channels)
+        public void SetChannels(double[][,] channels)
         {
             for (int i = 0; i < this.bitmapHeight; i++)
             {
                 for (int j = 0; j < this.bitmapWidth; j++)
                 {
-                    this.image[i, j].R = channels[0][i, j];
-                    this.image[i, j].G = channels[1][i, j];
-                    this.image[i, j].B = channels[2][i, j];
+                    this.image[i, j].R = (int) channels[0][i, j];
+                    this.image[i, j].G = (int) channels[1][i, j];
+                    this.image[i, j].B = (int) channels[2][i, j];
                 }
             }
         }
@@ -615,9 +615,9 @@ namespace ImageProcessing
         /// <param name="matrix"></param>
         /// <param name="kernel"></param>
         /// <returns>The convoluted matrix</returns>
-        public static int[,] Convolution(int[,] matrix, float[,] kernel)
+        public static double[,] Convolution(int[,] matrix, double[,] kernel)
         {
-            int[,] result = new int[matrix.GetLength(0), matrix.GetLength(1)];
+            double[,] result = new double[matrix.GetLength(0), matrix.GetLength(1)];
 
             for (int i = 0; i < matrix.GetLength(0); i++)
             {
@@ -629,7 +629,7 @@ namespace ImageProcessing
                         {
                             if ((i - (kernel.GetLength(0) / 2) + l) >= 0 && (i - (kernel.GetLength(0) / 2) + l) < matrix.GetLength(0) && (j - (kernel.GetLength(1) / 2) + k) >= 0 && (j - (kernel.GetLength(1) / 2) + k) < matrix.GetLength(1))
                             {
-                                result[i, j] += (int)(kernel[l, k] * matrix[i - (kernel.GetLength(0) / 2) + l, j - (kernel.GetLength(1) / 2) + k]);
+                                result[i, j] += (kernel[l, k] * matrix[i - (kernel.GetLength(0) / 2) + l, j - (kernel.GetLength(1) / 2) + k]);
                             }
                         }
                     }
@@ -644,7 +644,7 @@ namespace ImageProcessing
         /// <returns></returns>
         public MyImage Blur()
         {
-            return Convoluted(new float[,] { { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f } });
+            return Convoluted(new double[,] { { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f }, { 1 / 9f, 1 / 9f, 1 / 9f } });
         }
 
         /// <summary>
@@ -653,7 +653,7 @@ namespace ImageProcessing
         /// <returns></returns>
         public MyImage BorderDetection()
         {
-            return Convoluted(new float[,] { { 0, 1, 0 }, { 1, -4, 1 }, { 0, 1, 0 } });
+            return Convoluted(new double[,] { { 0, 1, 0 }, { 1, -4, 1 }, { 0, 1, 0 } });
         }
 
         /// <summary>
@@ -662,7 +662,7 @@ namespace ImageProcessing
         /// <returns></returns>
         public MyImage EdgeReinforcement()
         {
-            return Convoluted(new float[,] { { 0, 0, 0 }, { -1, 1, 0 }, { 0, 0, 0 } });
+            return Convoluted(new double[,] { { 0, 0, 0 }, { -1, 1, 0 }, { 0, 0, 0 } });
         }
 
         /// <summary>
@@ -671,7 +671,7 @@ namespace ImageProcessing
         /// <returns></returns>
         public MyImage MotionBlur()
         {
-            return Convoluted(new float[,] { { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 } });
+            return Convoluted(new double[,] { { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f, 1 / 7f }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0 } });
 
         }
 
@@ -681,7 +681,7 @@ namespace ImageProcessing
         /// <returns></returns>
         public MyImage Emboss()
         {
-            return Convoluted(new float[,] { { -2, -1, 0 }, { -1, 1, 1 }, { 0, 1, 2 } });
+            return Convoluted(new double[,] { { -2, -1, 0 }, { -1, 1, 1 }, { 0, 1, 2 } });
         }
 
         /// <summary>
@@ -690,7 +690,7 @@ namespace ImageProcessing
         /// <returns></returns>
         public MyImage Sharpen()
         {
-            return Convoluted(new float[,] { { 0, -1, 0 }, { -1, 5, -1 }, { 0, -1, 0 } });
+            return Convoluted(new double[,] { { 0, -1, 0 }, { -1, 5, -1 }, { 0, -1, 0 } });
         }
 
         /// <summary>

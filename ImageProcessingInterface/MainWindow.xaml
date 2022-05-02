@@ -40,7 +40,7 @@
                         <TextBox HorizontalAlignment="Right" Name="RotationInput" Height="20" Text="30°" Width="150"/>
                     </DockPanel>
                 </Button>
-                <Button Style="{StaticResource FlatButton}" Click ="EffetMiroir" Content ="Effet Miroir "  Foreground="Black"/>
+                <Button Style="{StaticResource FlatButton}" Click ="Mirror" Content ="Effet Miroir "  Foreground="Black"/>
                 <Button Style="{StaticResource FlatButton}" Click ="DetectionContour" Content ="Détection des contours " Foreground="Black"/>
                 <Button Style="{StaticResource FlatButton}" Click ="RenforcementBord" Content ="Renforcement des bords "  Foreground="Black"/>
                 <Button Style="{StaticResource FlatButton}" Click ="FiltreFlou" Content ="Filtre flou "  Foreground="Black"/>

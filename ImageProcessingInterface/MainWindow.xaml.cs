@@ -216,9 +216,9 @@ namespace ImageProcessingInterface
             }
         }
 
-        public void EffetMiroir(object sender, RoutedEventArgs e)
+        public void Mirror(object sender, RoutedEventArgs e)
         {
-            ModifiedImage = ModifiedImage.EffetMiroir();
+            ModifiedImage = ModifiedImage.Mirror();
         }
         public void DetectionContour(object sender, RoutedEventArgs e)
         {

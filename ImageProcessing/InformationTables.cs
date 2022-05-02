@@ -2,11 +2,17 @@
 using System.Collections.Generic;
 namespace ImageProcessing
 {
+    /// <summary>
+    /// Information tables concerning the QR Codes
+    /// </summary>
     public static class InformationTables
     {
 
 
         // https://www.thonky.com/qr-code-tutorial/character-capacities
+        /// <summary>
+        /// The character capacity of a certain version, error correction and mode
+        /// </summary>
         public static Dictionary<int, Dictionary<char, Dictionary<byte, int>>> Capacities =
             new Dictionary<int, Dictionary<char, Dictionary<byte, int>>>
             {
@@ -131,6 +137,9 @@ namespace ImageProcessing
             };
 
         // https://www.thonky.com/qr-code-tutorial/alignment-pattern-locations
+        /// <summary>
+        /// The locations of the alignment patterns for a certain version
+        /// </summary>
         public static Dictionary<int, int[]> AlignmentPatternLocations =
             new Dictionary<int, int[]>
             {
@@ -172,6 +181,9 @@ namespace ImageProcessing
 
 
         // https://www.thonky.com/qr-code-tutorial/error-correction-table
+        /// <summary>
+        /// The number of error correction bytes for a certain version
+        /// </summary>
         public static Dictionary<int, int> ErrorCorrectionBytes =
             new Dictionary<int, int>
             {

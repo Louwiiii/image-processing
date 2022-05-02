@@ -4,6 +4,9 @@ using System.Text;
 using System.Collections.Generic;
 namespace ImageProcessing
 {
+    /// <summary>
+    /// A MyImage containing a QR Code
+    /// </summary>
     public class QRCode : MyImage
     {
         /// <summary>
@@ -22,34 +25,36 @@ namespace ImageProcessing
 
 
         /// <summary>
-        /// 
+        /// Create a new MyImage representing a QR Code encoding the input string.
         /// </summary>
-        /// <param name="content"></param>
-        /// <exception cref="Exception"></exception>
+        /// <remarks>The length of the content can't exceed 154 characters</remarks>
+        /// <param name="content">The content of the QR Code as an alphanumeric string</param>
+        /// <exception cref="Exception">The string is not alphanumeric</exception>
         public QRCode(string content) : base(0, 0)
         {
-            content = content.ToUpper(); // Version 5 can only contain 154 characters and other versions are not supported
-            if (content.Length > 154)
+            content = content.ToUpper(); 
+            if (content.Length > 154) // Version 5 can only contain 154 characters and other versions are not supported
                 content = content.Substring(0, 154);
             if (!content.All(x => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:".Contains(x)))
                 throw new Exception("The entered text is not alpha-numeric");
 
 
+            // The byte corresponding to the mode (alphanumeric)
             byte mode = 0b0010;
             string encodedMode = Convert.ToString(mode, 2).PadLeft(4, '0');
             char correctionLevel = 'L';
-            int version = 1;
 
+            // Find the best version for this content length
+            int version = 1;
             while (GetCharacterCapacity(version, correctionLevel, mode) < content.Length)
                 version++;
 
-            Console.WriteLine(version);
-
             string encodedContentLength = Convert.ToString(content.Length, 2).PadLeft(9, '0');
 
+            // encodedString will contain the entire encoded data that will be placed in the QR Code
             string encodedString = encodedMode + encodedContentLength + EncodeContent(content);
 
-            int targetNumberOfBits = GetMaxNumberOfBits(version);
+            int targetNumberOfBits = GetMaxNumberOfBits(version); // The number of bits of the message for this version of QR Code
 
             // Add up to 4 '0' as a terminator
             if (targetNumberOfBits - encodedString.Length >= 4)
@@ -60,6 +65,7 @@ namespace ImageProcessing
             // If number of bits is not a multiple of 8, add bits
             encodedString += new string('0', (8 - (encodedString.Length % 8)) % 8);
 
+            // Add padding bytes
             int switchFlag = 1;
             while (encodedString.Length < targetNumberOfBits)
             {
@@ -89,32 +95,46 @@ namespace ImageProcessing
             FillQRCode(this.image, version: version, dataBits: encodedString, correctionLevel: correctionLevel);
         }
 
+        /// <summary>
+        /// Gets an image and creates a QR Code object from it, trying to extract a QR Code
+        /// </summary>
+        /// <param name="image">The image to extract the QR Code from</param>
         public QRCode (MyImage image) : base(0, 0)
         {
             this.image = ExtractQRFromImage(image);
         }
 
+        /// <summary>
+        /// Encode an entire alphanumeric to a binary string encoded with the QR Code encoding specifications
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns>A string of '0' and '1' representing the encoded content</returns>
         static string EncodeContent(string content)
         {
             string result = "";
             for (int i = 0; i < content.Length; i += 2)
             {
                 int encodedValue = 0;
-                if (i == content.Length - 1)
-                {
-                    encodedValue = EncodeChar(content[i]);
-                    result += Convert.ToString(encodedValue, 2).PadLeft(6, '0');
-                }
-                else
+                if (!(i == content.Length - 1)) // We encode the characters two by two
                 {
                     encodedValue = EncodeChar(content[i]) * 45 + EncodeChar(content[i + 1]);
                     result += Convert.ToString(encodedValue, 2).PadLeft(11, '0');
+                }
+                else // If the string hasn't an even number of characters, encode the last character alone
+                {
+                    encodedValue = EncodeChar(content[i]);
+                    result += Convert.ToString(encodedValue, 2).PadLeft(6, '0');
                 }
             }
 
             return result;
         }
 
+        /// <summary>
+        /// Get the int corresponding to a char in the QR Code alphanumeric encoding 
+        /// </summary>
+        /// <param name="character"></param>
+        /// <returns></returns>
         static int EncodeChar(char character)
         {
             if (char.IsDigit(character))
@@ -128,18 +148,24 @@ namespace ImageProcessing
             else
             {
                 return " $%*+-./:".IndexOf(character) + 36;
-                // Char is in the " $%*+-./:" string or can't be encoded
             }
         }
 
 
+        /// <summary>
+        /// Get the number of character that can contain a certain version
+        /// </summary>
+        /// <param name="version"></param>
+        /// <param name="correctionLevel"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
         static int GetCharacterCapacity(int version, char correctionLevel = 'L', byte mode = 0b0010)
         {
             return InformationTables.Capacities[version][correctionLevel][mode];
         }
 
         /// <summary>
-        /// Get the maximum number of bits of the data
+        /// Get the maximum number of bits of the data (correction bits not included) for a certain version
         /// </summary>
         /// <param name="version"></param>
         /// <param name="correctionLevel"></param>
@@ -153,6 +179,11 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Convert a string of bits to a byte array
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         static byte[] BinaryStringToBytes(string input)
         {
             byte[] result = new byte[input.Length / 8];
@@ -164,6 +195,14 @@ namespace ImageProcessing
             return result;
         }
 
+
+        /// <summary>
+        /// Fills a QR Code image with the given data binary string
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <param name="version"></param>
+        /// <param name="dataBits"></param>
+        /// <param name="correctionLevel"></param>
         static void FillQRCode(Pixel[,] matrix, int version, string dataBits, char correctionLevel)
         {
 
@@ -446,6 +485,10 @@ namespace ImageProcessing
             }
         }
 
+        /// <summary>
+        /// Extract the encoded data as a text string from the QR Code
+        /// </summary>
+        /// <returns></returns>
         public string Read()
         {
             if (this.image == null) // No QR Code found
@@ -733,6 +776,13 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Decode the encoded alphanumeric text from a string of bits
+        /// </summary>
+        /// <param name="databits"></param>
+        /// <param name="version"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static string DecodeData(string databits, int version)
         {
             string message = databits.Substring(0, GetMaxNumberOfBits(version));
@@ -807,6 +857,11 @@ namespace ImageProcessing
             return result;
         }
 
+        /// <summary>
+        /// Get the char corresponding to a certain code according to the QR Code alphanumeric encoding
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
         public static char DecodeChar (int code)
         {
             if (code <= 9)
@@ -866,6 +921,12 @@ namespace ImageProcessing
             return (errorCorrectionLevel, Convert.ToInt32(maskString, 2) ^ 0b101);
         }
 
+        /// <summary>
+        /// Divide to strings of bits in GF(256)
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
         static string PolynomialDivision(string a, string b)
         {
             // Step 1
